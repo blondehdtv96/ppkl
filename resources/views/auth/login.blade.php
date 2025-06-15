@@ -111,39 +111,7 @@
         
         <div class="login-form">
             <div class="text-center mb-4">
-                <svg width="100" height="100" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg" class="logo">
-                    <!-- Gear (Blue) -->
-                    <path d="M150,20 C80,20 20,80 20,150 C20,220 80,280 150,280 C220,280 280,220 280,150 C280,80 220,20 150,20 Z M150,40 C210,40 260,90 260,150 C260,210 210,260 150,260 C90,260 40,210 40,150 C40,90 90,40 150,40 Z" fill="#0000CC"/>
-                    <!-- Inner Gear Teeth -->
-                    <path d="M150,60 L160,40 L140,40 Z" fill="#0000CC"/>
-                    <path d="M190,70 L210,55 L190,50 Z" fill="#0000CC"/>
-                    <path d="M220,110 L240,100 L230,80 Z" fill="#0000CC"/>
-                    <path d="M220,190 L240,200 L230,220 Z" fill="#0000CC"/>
-                    <path d="M190,230 L210,245 L190,250 Z" fill="#0000CC"/>
-                    <path d="M150,240 L160,260 L140,260 Z" fill="#0000CC"/>
-                    <path d="M110,230 L90,245 L110,250 Z" fill="#0000CC"/>
-                    <path d="M80,190 L60,200 L70,220 Z" fill="#0000CC"/>
-                    <path d="M80,110 L60,100 L70,80 Z" fill="#0000CC"/>
-                    <path d="M110,70 L90,55 L110,50 Z" fill="#0000CC"/>
-                    
-                    <!-- Book (Blue) -->
-                    <path d="M100,220 L200,220 L200,240 L100,240 Z" fill="#0000CC"/>
-                    <path d="M100,240 C80,230 80,230 100,220" fill="#0000CC"/>
-                    <path d="M200,240 C220,230 220,230 200,220" fill="#0000CC"/>
-                    <path d="M150,220 L150,240" stroke="#FFFFFF" stroke-width="2"/>
-                    
-                    <!-- Computer/Student (White) -->
-                    <rect x="130" y="130" width="40" height="30" fill="white"/>
-                    <rect x="140" y="160" width="20" height="20" fill="white"/>
-                    <circle cx="150" cy="110" r="15" fill="white"/>
-                    
-                    <!-- Lightning Bolts (Red) -->
-                    <path d="M100,150 L120,170 L110,190 L140,160 L130,140 L140,120 Z" fill="#CC0000"/>
-                    <path d="M200,150 L180,170 L190,190 L160,160 L170,140 L160,120 Z" fill="#CC0000"/>
-                    
-                    <!-- Star (Red) -->
-                    <path d="M150,20 L157,35 L173,35 L162,45 L167,60 L150,50 L133,60 L138,45 L127,35 L143,35 Z" fill="#CC0000"/>
-                </svg>
+                <img src="{{ asset('logo.svg') }}" alt="Logo SMK BINA MANDIRI" class="logo">
                 <h3>Selamat Datang</h3>
                 <p class="text-muted">Masukkan Nama Pengguna dan Kata Sandi untuk melanjutkan.</p>
             </div>

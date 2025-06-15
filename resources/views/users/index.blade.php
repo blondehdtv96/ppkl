@@ -5,12 +5,26 @@
 @section('page-title', 'Manajemen Pengguna')
 
 @section('page-actions')
-    @can('create', App\Models\User::class)
-    <a href="{{ route('users.create') }}" class="btn btn-primary">
-        <i class="fas fa-plus me-2"></i>
-        Tambah Pengguna
-    </a>
-    @endcan
+    <div class="d-flex gap-2">
+        @can('create', App\Models\User::class)
+        <a href="{{ route('users.create') }}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>
+            Tambah Pengguna
+        </a>
+        @endcan
+        
+        @can('viewAny', App\Models\User::class)
+        <a href="{{ route('users.export') }}" class="btn btn-success">
+            <i class="fas fa-file-export me-2"></i>
+            Export Users
+        </a>
+        
+        <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#importModal">
+            <i class="fas fa-file-import me-2"></i>
+            Import Users
+        </button>
+        @endcan
+    </div>
 @endsection
 
 @section('content')
@@ -314,6 +328,42 @@
     </div>
 </div>
 
+<!-- Import Modal -->
+<div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="{{ route('users.import') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="modal-header">
+                    <h5 class="modal-title" id="importModalLabel">Import Users</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="csv_file" class="form-label">File CSV</label>
+                        <input type="file" class="form-control" id="csv_file" name="csv_file" accept=".csv,.txt" required>
+                    </div>
+                    <div class="alert alert-info">
+                        <h6 class="alert-heading">Petunjuk Import:</h6>
+                        <ul class="mb-0">
+                            <li>File harus dalam format CSV</li>
+                            <li>Kolom yang diperlukan: name, email, role</li>
+                            <li>Untuk update user, sertakan kolom id</li>
+                            <li>Password default untuk user baru: "password"</li>
+                            <li>Kolom is_active: 1 (aktif) atau 0 (nonaktif)</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary">Import</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endsection
+
 @push('styles')
 <style>
 .avatar-circle {
@@ -338,4 +388,3 @@
 }
 </style>
 @endpush
-@endsection

@@ -24,6 +24,7 @@ class UserSeeder extends Seeder
 
         // Wali Kelas
         User::create([
+            'name' => 'Wali Kelas',
             'email' => 'wali@pkl.test',
             'password' => Hash::make('password'),
             'role' => 'wali_kelas',

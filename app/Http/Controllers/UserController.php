@@ -255,4 +255,136 @@ class UserController extends Controller
         return redirect()->route('users.profile')
                        ->with('success', 'Profil berhasil diperbarui.');
     }
+
+    public function export() 
+    {
+        $this->authorize('viewAny', User::class);
+        
+        $users = User::all();
+        
+        $filename = 'users_export_' . date('Y-m-d_H-i-s') . '.csv';
+        
+        $headers = array(
+            "Content-type"        => "text/csv",
+            "Content-Disposition" => "attachment; filename=$filename",
+            "Pragma"              => "no-cache",
+            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
+            "Expires"             => "0"
+        );
+        
+        $columns = ['id', 'name', 'email', 'role', 'kelas', 'jurusan', 'nis', 'is_active', 'kelas_diampu', 'jurusan_diampu', 'custom_kelas_diampu', 'created_at', 'updated_at'];
+        
+        $callback = function() use($users, $columns) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, $columns);
+            
+            foreach ($users as $user) {
+                $row = [];
+                foreach ($columns as $column) {
+                    if ($column == 'kelas_diampu' || $column == 'jurusan_diampu') {
+                        $row[] = $user->$column ? json_encode($user->$column) : '';
+                    } else if ($column == 'is_active') {
+                        $row[] = $user->$column ? '1' : '0';
+                    } else {
+                        $row[] = $user->$column;
+                    }
+                }
+                fputcsv($file, $row);
+            }
+            
+            fclose($file);
+        };
+        
+        return response()->stream($callback, 200, $headers);
+    }
+    
+    public function import(Request $request)
+    {
+        $this->authorize('create', User::class);
+        
+        $request->validate([
+            'csv_file' => 'required|file|mimes:csv,txt|max:2048',
+        ]);
+        
+        $file = $request->file('csv_file');
+        $path = $file->getRealPath();
+        
+        $data = array_map('str_getcsv', file($path));
+        $headers = array_shift($data);
+        
+        $importCount = 0;
+        $updateCount = 0;
+        $errorCount = 0;
+        
+        foreach ($data as $row) {
+            $userData = array_combine($headers, $row);
+            
+            try {
+                // Jika ada ID dan user dengan ID tersebut ada, update user
+                if (!empty($userData['id']) && User::find($userData['id'])) {
+                    $user = User::find($userData['id']);
+                    
+                    // Jangan update password dari CSV
+                    unset($userData['password']);
+                    
+                    // Konversi array yang disimpan sebagai JSON string
+                    if (isset($userData['kelas_diampu']) && !empty($userData['kelas_diampu'])) {
+                        $userData['kelas_diampu'] = json_decode($userData['kelas_diampu'], true);
+                    }
+                    
+                    if (isset($userData['jurusan_diampu']) && !empty($userData['jurusan_diampu'])) {
+                        $userData['jurusan_diampu'] = json_decode($userData['jurusan_diampu'], true);
+                    }
+                    
+                    // Konversi is_active dari string ke boolean
+                    if (isset($userData['is_active'])) {
+                        $userData['is_active'] = filter_var($userData['is_active'], FILTER_VALIDATE_BOOLEAN);
+                    }
+                    
+                    $user->update($userData);
+                    $updateCount++;
+                } 
+                // Jika tidak ada ID atau user dengan ID tersebut tidak ada, buat user baru
+                else {
+                    // Hapus ID untuk membuat user baru
+                    unset($userData['id']);
+                    
+                    // Set password default jika tidak ada
+                    if (empty($userData['password'])) {
+                        $userData['password'] = Hash::make('password');
+                    } else {
+                        $userData['password'] = Hash::make($userData['password']);
+                    }
+                    
+                    // Konversi array yang disimpan sebagai JSON string
+                    if (isset($userData['kelas_diampu']) && !empty($userData['kelas_diampu'])) {
+                        $userData['kelas_diampu'] = json_decode($userData['kelas_diampu'], true);
+                    }
+                    
+                    if (isset($userData['jurusan_diampu']) && !empty($userData['jurusan_diampu'])) {
+                        $userData['jurusan_diampu'] = json_decode($userData['jurusan_diampu'], true);
+                    }
+                    
+                    // Konversi is_active dari string ke boolean
+                    if (isset($userData['is_active'])) {
+                        $userData['is_active'] = filter_var($userData['is_active'], FILTER_VALIDATE_BOOLEAN);
+                    }
+                    
+                    User::create($userData);
+                    $importCount++;
+                }
+            } catch (\Exception $e) {
+                $errorCount++;
+                // Log error jika diperlukan
+                \Log::error('Error importing user: ' . $e->getMessage());
+            }
+        }
+        
+        $message = "Import selesai: $importCount user baru ditambahkan, $updateCount user diperbarui";
+        if ($errorCount > 0) {
+            $message .= ", $errorCount error ditemukan";
+        }
+        
+        return redirect()->route('users.index')->with('success', $message);
+    }
 }

@@ -68,5 +68,7 @@ Route::middleware('auth')->group(function () {
     Route::middleware('can:viewAny,App\Models\User')->group(function () {
         Route::resource('users', UserController::class);
         Route::post('/users/{user}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggle-status');
+        Route::get('/users-export', [UserController::class, 'export'])->name('users.export');
+        Route::post('/users-import', [UserController::class, 'import'])->name('users.import');
     });
 });
