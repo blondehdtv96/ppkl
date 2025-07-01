@@ -72,7 +72,6 @@ class UserController extends Controller
             'jurusan' => 'nullable|string|max:255',
             'nis' => 'nullable|string|max:255|unique:users',
             'is_active' => 'boolean',
-            'kelas_diampu' => 'nullable|array',
             'jurusan_diampu' => 'nullable|array',
             'custom_kelas_diampu' => 'nullable|string|max:255',
         ]);
@@ -88,9 +87,8 @@ class UserController extends Controller
             'is_active' => $request->boolean('is_active', true),
         ];
         
-        // Tambahkan kelas_diampu jika role adalah wali_kelas
+        // Tambahkan custom_kelas_diampu jika role adalah wali_kelas
         if ($request->role === 'wali_kelas') {
-            $userData['kelas_diampu'] = $request->kelas_diampu ?? [];
             $userData['custom_kelas_diampu'] = $request->custom_kelas_diampu;
         }
         
@@ -134,7 +132,6 @@ class UserController extends Controller
             'jurusan' => 'nullable|string|max:255',
             'nis' => ['nullable', 'string', 'max:255', Rule::unique('users')->ignore($user->id)],
             'is_active' => 'boolean',
-            'kelas_diampu' => 'nullable|array',
             'jurusan_diampu' => 'nullable|array',
             'custom_kelas_diampu' => 'nullable|string|max:255',
         ]);
@@ -149,12 +146,10 @@ class UserController extends Controller
             'is_active' => $request->boolean('is_active', true),
         ];
         
-        // Tambahkan kelas_diampu jika role adalah wali_kelas
+        // Tambahkan custom_kelas_diampu jika role adalah wali_kelas
         if ($request->role === 'wali_kelas') {
-            $data['kelas_diampu'] = $request->kelas_diampu ?? [];
             $data['custom_kelas_diampu'] = $request->custom_kelas_diampu;
         } else {
-            $data['kelas_diampu'] = null;
             $data['custom_kelas_diampu'] = null;
         }
         
@@ -223,7 +218,6 @@ class UserController extends Controller
             'kelas' => 'nullable|string|max:255',
             'jurusan' => 'nullable|string|max:255',
             'nis' => ['nullable', 'string', 'max:255', Rule::unique('users')->ignore($user->id)],
-            'kelas_diampu' => 'nullable|array',
             'jurusan_diampu' => 'nullable|array',
         ]);
 
@@ -235,10 +229,7 @@ class UserController extends Controller
             'nis' => $request->nis,
         ];
         
-        // Tambahkan kelas_diampu jika role adalah wali_kelas
-        if ($user->isWaliKelas()) {
-            $data['kelas_diampu'] = $request->kelas_diampu ?? [];
-        }
+
         
         // Tambahkan jurusan_diampu jika role adalah kaprog
         if ($user->isKaprog()) {
@@ -272,7 +263,7 @@ class UserController extends Controller
             "Expires"             => "0"
         );
         
-        $columns = ['id', 'name', 'email', 'role', 'kelas', 'jurusan', 'nis', 'is_active', 'kelas_diampu', 'jurusan_diampu', 'custom_kelas_diampu', 'created_at', 'updated_at'];
+        $columns = ['id', 'name', 'email', 'role', 'kelas', 'jurusan', 'nis', 'is_active', 'jurusan_diampu', 'custom_kelas_diampu', 'created_at', 'updated_at'];
         
         $callback = function() use($users, $columns) {
             $file = fopen('php://output', 'w');
@@ -281,7 +272,7 @@ class UserController extends Controller
             foreach ($users as $user) {
                 $row = [];
                 foreach ($columns as $column) {
-                    if ($column == 'kelas_diampu' || $column == 'jurusan_diampu') {
+                    if ($column == 'jurusan_diampu') {
                         $row[] = $user->$column ? json_encode($user->$column) : '';
                     } else if ($column == 'is_active') {
                         $row[] = $user->$column ? '1' : '0';
@@ -328,11 +319,8 @@ class UserController extends Controller
                     unset($userData['password']);
                     
                     // Konversi array yang disimpan sebagai JSON string
-                    if (isset($userData['kelas_diampu']) && !empty($userData['kelas_diampu'])) {
-                        $userData['kelas_diampu'] = json_decode($userData['kelas_diampu'], true);
-                    }
                     
-                    if (isset($userData['jurusan_diampu']) && !empty($userData['jurusan_diampu'])) {
+                    if (isset($userData['jurusan_diampu']) && !empty($userData['jurusan_diampu']) && is_string($userData['jurusan_diampu'])) {
                         $userData['jurusan_diampu'] = json_decode($userData['jurusan_diampu'], true);
                     }
                     
@@ -357,11 +345,8 @@ class UserController extends Controller
                     }
                     
                     // Konversi array yang disimpan sebagai JSON string
-                    if (isset($userData['kelas_diampu']) && !empty($userData['kelas_diampu'])) {
-                        $userData['kelas_diampu'] = json_decode($userData['kelas_diampu'], true);
-                    }
                     
-                    if (isset($userData['jurusan_diampu']) && !empty($userData['jurusan_diampu'])) {
+                    if (isset($userData['jurusan_diampu']) && !empty($userData['jurusan_diampu']) && is_string($userData['jurusan_diampu'])) {
                         $userData['jurusan_diampu'] = json_decode($userData['jurusan_diampu'], true);
                     }
                     

@@ -50,6 +50,59 @@ class PermohonanPkl extends Model
         return $this->hasMany(Notifikasi::class, 'permohonan_id');
     }
 
+    // Scopes
+    public function scopeForWaliKelas($query, User $waliKelas)
+    {
+        if (!$waliKelas->isWaliKelas()) {
+            return $query->whereRaw('1 = 0'); // Return empty result
+        }
+
+        $siswaIds = $waliKelas->getSiswaByKelas()->pluck('id')->toArray();
+        
+        if (empty($siswaIds)) {
+            return $query->whereRaw('1 = 0'); // Return empty result
+        }
+
+        return $query->whereIn('user_id', $siswaIds);
+    }
+
+    public function scopeForKaprog($query, User $kaprog)
+    {
+        if (!$kaprog->isKaprog()) {
+            return $query->whereRaw('1 = 0'); // Return empty result
+        }
+
+        $siswaIds = $kaprog->getSiswaByJurusan()->pluck('id')->toArray();
+        
+        if (empty($siswaIds)) {
+            return $query->whereRaw('1 = 0'); // Return empty result
+        }
+
+        return $query->whereIn('user_id', $siswaIds);
+    }
+
+    public function scopeForUser($query, User $user)
+    {
+        if ($user->isAdmin()) {
+            return $query; // Admin bisa melihat semua
+        }
+
+        if ($user->isSiswa()) {
+            return $query->where('user_id', $user->id); // Siswa hanya melihat miliknya
+        }
+
+        if ($user->isWaliKelas()) {
+            return $query->forWaliKelas($user);
+        }
+
+        if ($user->isKaprog()) {
+            return $query->forKaprog($user);
+        }
+
+        // Role lain (BP, TU, Hubin) bisa melihat semua
+        return $query;
+    }
+
     // Helper methods
     public function getStatusLabelAttribute()
     {
@@ -64,7 +117,7 @@ class PermohonanPkl extends Model
             'disetujui_kaprog' => 'Disetujui Kaprog',
             'ditolak_tu' => 'Ditolak TU',
             'disetujui_tu' => 'Disetujui TU',
-            'dicetak_hubin' => 'Dicetak Hubin',
+            'dicetak_hubin' => 'Disetujui Hubin',
         ];
 
         return $statusLabels[$this->status] ?? $this->status;

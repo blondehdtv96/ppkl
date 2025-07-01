@@ -31,7 +31,17 @@ class PermohonanPklPolicy
             return $user->id === $permohonanPkl->user_id;
         }
 
-        // Staff bisa melihat permohonan yang perlu diproses atau sudah diproses
+        // Wali kelas hanya bisa melihat siswa dari kelas yang diampu
+        if ($user->isWaliKelas()) {
+            return $this->canViewBasedOnKelas($user, $permohonanPkl) && $this->canProcessOrHasProcessed($user, $permohonanPkl);
+        }
+
+        // Kaprog hanya bisa melihat siswa dari jurusan yang diampu
+        if ($user->isKaprog()) {
+            return $this->canViewBasedOnJurusan($user, $permohonanPkl) && $this->canProcessOrHasProcessed($user, $permohonanPkl);
+        }
+
+        // Staff lainnya bisa melihat permohonan yang perlu diproses atau sudah diproses
         return $this->canProcessOrHasProcessed($user, $permohonanPkl);
     }
 
@@ -90,7 +100,17 @@ class PermohonanPklPolicy
             return true;
         }
 
-        // Staff bisa memproses sesuai dengan role dan status
+        // Wali kelas hanya bisa memproses siswa dari kelas yang diampu
+        if ($user->isWaliKelas()) {
+            return $this->canViewBasedOnKelas($user, $permohonanPkl) && $permohonanPkl->canBeProcessedBy($user->role);
+        }
+
+        // Kaprog hanya bisa memproses siswa dari jurusan yang diampu
+        if ($user->isKaprog()) {
+            return $this->canViewBasedOnJurusan($user, $permohonanPkl) && $permohonanPkl->canBeProcessedBy($user->role);
+        }
+
+        // Staff lainnya bisa memproses sesuai dengan role dan status
         return $permohonanPkl->canBeProcessedBy($user->role);
     }
 
@@ -123,5 +143,47 @@ class PermohonanPklPolicy
             ->where('user_id', $user->id)
             ->where('role_processor', $user->role)
             ->exists();
+    }
+
+    /**
+     * Helper method to check if wali kelas can view based on kelas
+     */
+    private function canViewBasedOnKelas(User $user, PermohonanPkl $permohonanPkl): bool
+    {
+        $siswa = $permohonanPkl->user;
+        
+        // Jika siswa tidak memiliki kelas, tidak bisa dilihat
+        if (!$siswa->kelas) {
+            return false;
+        }
+
+        // Cek custom_kelas_diampu (bisa multiple kelas dipisah koma)
+        if ($user->custom_kelas_diampu) {
+            // Parse kelas yang diampu (bisa multiple, dipisah koma)
+            $kelasArray = array_map('trim', explode(',', $user->custom_kelas_diampu));
+            return in_array($siswa->kelas, $kelasArray);
+        }
+
+        return false;
+    }
+
+    /**
+     * Helper method to check if kaprog can view based on jurusan
+     */
+    private function canViewBasedOnJurusan(User $user, PermohonanPkl $permohonanPkl): bool
+    {
+        $siswa = $permohonanPkl->user;
+        
+        // Jika siswa tidak memiliki jurusan, tidak bisa dilihat
+        if (!$siswa->jurusan) {
+            return false;
+        }
+
+        // Cek jurusan_diampu (array)
+        if ($user->jurusan_diampu && is_array($user->jurusan_diampu)) {
+            return in_array($siswa->jurusan, $user->jurusan_diampu);
+        }
+
+        return false;
     }
 }

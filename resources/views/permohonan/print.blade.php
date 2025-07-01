@@ -285,7 +285,7 @@
     
     <!-- Back Button -->
     <a href="{{ route('permohonan.show', $permohonan) }}" class="back-button no-print">
-        <i class="fas fa-arrow-left"></i> Kembali
+        <i class="fas fa-arrow-left me-2"></i>Kembali
     </a>
 </body>
 </html>

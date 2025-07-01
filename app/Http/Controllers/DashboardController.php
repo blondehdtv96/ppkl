@@ -87,8 +87,47 @@ class DashboardController extends Controller
         $targetStatus = $statusMap[$role] ?? null;
         $user = Auth::user();
 
+        // Base query untuk pending permohonan
+        $pendingQuery = $targetStatus ? PermohonanPkl::where('status', $targetStatus) : PermohonanPkl::whereRaw('1=0');
+        
+        // Base query untuk pending list
+        $pendingListQuery = $targetStatus ? PermohonanPkl::with('user')->where('status', $targetStatus) : PermohonanPkl::whereRaw('1=0');
+
+        // Filter berdasarkan kelas untuk wali kelas
+        if ($role === 'wali_kelas' && $user->custom_kelas_diampu) {
+            // Parse kelas yang diampu (bisa multiple, dipisah koma)
+            $kelasArray = array_map('trim', explode(',', $user->custom_kelas_diampu));
+            
+            $pendingQuery->whereHas('user', function($q) use ($kelasArray) {
+                $q->whereIn('kelas', $kelasArray);
+            });
+            
+            $pendingListQuery->whereHas('user', function($q) use ($kelasArray) {
+                $q->whereIn('kelas', $kelasArray);
+            });
+        }
+        
+        // Filter berdasarkan jurusan untuk kaprog
+        if ($role === 'kaprog' && !empty($user->jurusan_diampu)) {
+            $pendingQuery->whereHas('user', function($q) use ($user) {
+                $q->whereIn('jurusan', $user->jurusan_diampu);
+            });
+            
+            $pendingListQuery->whereHas('user', function($q) use ($user) {
+                $q->whereIn('jurusan', $user->jurusan_diampu);
+            });
+        }
+
         return [
-            'pending_permohonan' => $targetStatus ? PermohonanPkl::where('status', $targetStatus)->count() : 0,
+            'permohonan_menunggu' => $pendingQuery->count(),
+            'permohonan_disetujui' => PermohonanPkl::whereHas('historiPermohonan', function($query) use ($role) {
+                $query->where('role_processor', $role)
+                    ->where('aksi', 'disetujui');
+            })->count(),
+            'permohonan_ditolak' => PermohonanPkl::whereHas('historiPermohonan', function($query) use ($role) {
+                $query->where('role_processor', $role)
+                    ->where('aksi', 'ditolak');
+            })->count(),
             'processed_today' => PermohonanPkl::whereHas('historiPermohonan', function($query) use ($role) {
                 $query->where('role_processor', $role)
                     ->whereDate('created_at', today());
@@ -96,11 +135,10 @@ class DashboardController extends Controller
             'total_processed' => PermohonanPkl::whereHas('historiPermohonan', function($query) use ($role) {
                 $query->where('role_processor', $role);
             })->count(),
-            'pending_list' => $targetStatus ? PermohonanPkl::with('user')
-                ->where('status', $targetStatus)
+            'recent_applications' => $pendingListQuery
                 ->orderBy('created_at', 'asc')
                 ->limit(10)
-                ->get() : collect(),
+                ->get(),
             'unread_notifications' => $user->getUnreadNotificationsCount(),
             'role_label' => $this->getRoleLabel($role),
         ];

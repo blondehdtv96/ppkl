@@ -272,7 +272,7 @@
                         <div class="row no-gutters align-items-center">
                             <div class="col mr-2">
                                 <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Permohonan Menunggu</div>
-                                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $data['pending_permohonan'] }}</div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $data['permohonan_menunggu'] }}</div>
                             </div>
                             <div class="col-auto">
                                 <i class="fas fa-clock fa-2x text-gray-300"></i>
@@ -322,7 +322,7 @@
                         <h6 class="m-0 font-weight-bold text-primary">Permohonan Menunggu Persetujuan {{ $data['role_label'] }}</h6>
                     </div>
                     <div class="card-body">
-                        @if($data['pending_list']->count() > 0)
+                        @if($data['recent_applications']->count() > 0)
                             <div class="table-responsive">
                                 <table class="table table-bordered" width="100%" cellspacing="0">
                                     <thead>
@@ -333,7 +333,7 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach($data['pending_list'] as $permohonan)
+                                        @foreach($data['recent_applications'] as $permohonan)
                                         <tr>
                                             <td>{{ $permohonan->user->name }}</td>
                                             <td>{{ $permohonan->created_at->format('d M Y') }}</td>
@@ -399,7 +399,7 @@
             'disetujui_kaprog': 'Disetujui Kaprog',
             'disetujui_tu': 'Disetujui TU',
             'disetujui_hubin': 'Disetujui Hubin',
-            'dicetak_hubin': 'Selesai',
+            'dicetak_hubin': 'Disetujui Hubin',
             'ditolak_wali': 'Ditolak Wali Kelas',
             'ditolak_bp': 'Ditolak BP',
             'ditolak_kaprog': 'Ditolak Kaprog',

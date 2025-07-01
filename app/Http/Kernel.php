@@ -63,6 +63,7 @@ class Kernel extends HttpKernel
         'precognitive' => \Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests::class,
         'role' => \App\Http\Middleware\RoleMiddleware::class,
         'signed' => \App\Http\Middleware\ValidateSignature::class,
+        'validate.siswa.access' => \App\Http\Middleware\ValidateSiswaAccess::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
     ];

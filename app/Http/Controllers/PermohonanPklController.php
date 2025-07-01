@@ -35,9 +35,12 @@ class PermohonanPklController extends Controller
                 $query->whereIn('status', $statusMap[$user->role]);
                 
                 // Filter berdasarkan kelas untuk wali kelas
-                if ($user->isWaliKelas() && !empty($user->kelas_diampu)) {
-                    $query->whereHas('user', function($q) use ($user) {
-                        $q->whereIn('kelas', $user->kelas_diampu);
+                if ($user->isWaliKelas() && $user->custom_kelas_diampu) {
+                    // Parse kelas yang diampu (bisa multiple, dipisah koma)
+                    $kelasArray = array_map('trim', explode(',', $user->custom_kelas_diampu));
+                    
+                    $query->whereHas('user', function($q) use ($kelasArray) {
+                        $q->whereIn('kelas', $kelasArray);
                     });
                 }
                 
@@ -443,9 +446,16 @@ class PermohonanPklController extends Controller
         if ($role === 'wali_kelas') {
             $kelasSiswa = $permohonan->user->kelas;
             $query->where(function($q) use ($kelasSiswa) {
-                $q->whereJsonContains('kelas_diampu', $kelasSiswa)
-                  ->orWhereJsonContains('kelas_diampu', substr($kelasSiswa, 0, 2)); // Untuk menangani format kelas seperti "XI RPL 1" -> "XI"
+                // Cek custom_kelas_diampu yang bisa berisi multiple kelas dipisah koma
+                $q->where('custom_kelas_diampu', 'LIKE', '%' . $kelasSiswa . '%')
+                  ->orWhere('custom_kelas_diampu', 'LIKE', '%' . substr($kelasSiswa, 0, 2) . '%');
             });
+        }
+        
+        // Filter kaprog berdasarkan jurusan siswa
+        if ($role === 'kaprog') {
+            $jurusanSiswa = $permohonan->user->jurusan;
+            $query->whereJsonContains('jurusan_diampu', $jurusanSiswa);
         }
         
         $users = $query->get();

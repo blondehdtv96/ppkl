@@ -84,7 +84,7 @@ class HistoriPermohonan extends Model
             'disetujui_kaprog' => 'Disetujui Kaprog',
             'ditolak_tu' => 'Ditolak TU',
             'disetujui_tu' => 'Disetujui TU',
-            'dicetak_hubin' => 'Dicetak Hubin',
+            'dicetak_hubin' => 'Disetujui Hubin',
         ];
 
         return $statusLabels[$this->status_ke] ?? $this->status_ke;

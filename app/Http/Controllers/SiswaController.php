@@ -21,21 +21,14 @@ class SiswaController extends Controller
         $query = User::where('role', 'siswa');
         
         // Filter siswa berdasarkan kelas yang diampu oleh wali kelas
-        if (!empty($user->kelas_diampu)) {
-            // Jika wali kelas memiliki custom_kelas_diampu, gunakan itu untuk filter yang lebih spesifik
-            if (!empty($user->custom_kelas_diampu)) {
-                $customKelas = explode(',', $user->custom_kelas_diampu);
-                $customKelas = array_map('trim', $customKelas);
-                
-                $query->where(function($q) use ($customKelas) {
-                    foreach ($customKelas as $kelas) {
-                        $q->orWhere('kelas', 'like', "%{$kelas}%");
-                    }
-                });
-            } else {
-                // Jika tidak ada custom_kelas_diampu, filter berdasarkan kelas_diampu (X, XI, XII)
-                $query->whereIn(DB::raw('SUBSTRING(kelas, 1, 2)'), $user->kelas_diampu);
-            }
+        // Wali kelas hanya bisa melihat siswa dari kelas yang secara eksplisit diberikan akses
+        if ($user->custom_kelas_diampu) {
+            // Parse kelas yang diampu (bisa multiple, dipisah koma)
+            $kelasArray = array_map('trim', explode(',', $user->custom_kelas_diampu));
+            $query->whereIn('kelas', $kelasArray);
+        } else {
+            // Jika tidak ada kelas yang diampu, tidak tampilkan siswa apapun
+            $query->whereRaw('1 = 0'); // Kondisi yang selalu false
         }
         
         // Filter pencarian
@@ -89,26 +82,8 @@ class SiswaController extends Controller
         }
         
         // Pastikan siswa yang dilihat adalah siswa yang berada di kelas yang diampu
-        $canView = false;
-        
-        if (!empty($user->custom_kelas_diampu)) {
-            $customKelas = explode(',', $user->custom_kelas_diampu);
-            $customKelas = array_map('trim', $customKelas);
-            
-            foreach ($customKelas as $kelas) {
-                if (strpos($siswa->kelas, $kelas) !== false) {
-                    $canView = true;
-                    break;
-                }
-            }
-        } else if (!empty($user->kelas_diampu)) {
-            $kelasPrefix = substr($siswa->kelas, 0, 2); // Ambil 2 karakter pertama (X, XI, XII)
-            if (in_array($kelasPrefix, $user->kelas_diampu)) {
-                $canView = true;
-            }
-        }
-        
-        if (!$canView) {
+        // Wali kelas hanya bisa melihat siswa dari kelas yang secara eksplisit diberikan akses
+        if (!$user->canViewSiswa($siswa)) {
             abort(403, 'Anda tidak memiliki akses untuk melihat siswa ini.');
         }
         

@@ -228,7 +228,7 @@
                                 <label class="form-label fw-bold">Sedang Diproses Oleh:</label>
                                 <p class="mb-0">
                                     {{ $permohonan->processor->name }}
-                                    <span class="badge bg-secondary ms-2">{{ ucfirst($permohonan->processor->role) }}</span>
+                                    <span class="badge bg-secondary ms-2">{{ $permohonan->processor->getRoleLabel() }}</span>
                                 </p>
                             </div>
                         </div>
@@ -260,7 +260,7 @@
                         <div class="timeline-content">
                             <h6 class="mb-1">{{ $histori->getStatusLabel() }}</h6>
                             <p class="text-muted mb-1">
-                                {{ $histori->processor->name }} ({{ ucfirst($histori->processor->role) }})
+                                {{ $histori->processor->name }} ({{ $histori->getRoleProcessorLabelAttribute() }})
                             </p>
                             <small class="text-muted">
                                 {{ $histori->created_at->format('d M Y H:i') }}

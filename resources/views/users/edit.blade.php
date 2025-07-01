@@ -209,27 +209,13 @@
                             </div>
                             <div class="card-body">
                                 <div class="mb-3">
-                                    <label class="form-label">Pilih Kelas yang Diampu <span class="text-danger">*</span></label>
-                                    <div class="row">
-                                        <div class="col-md-12">
-                                            <div class="form-check mb-2">
-                                                <input class="form-check-input kelas-diampu" type="checkbox" name="kelas_diampu[]" value="XI" id="kelasXI"
-                                                    {{ in_array('XI', old('kelas_diampu', json_decode($user->kelas_diampu ?? '[]', true))) ? 'checked' : '' }}>
-                                                <label class="form-check-label" for="kelasXI">Kelas XI</label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div id="customKelasDiampuField" class="mt-3 {{ in_array('XI', old('kelas_diampu', json_decode($user->kelas_diampu ?? '[]', true))) ? '' : 'd-none' }}">
-                                        <label class="form-label">Spesifikasi Kelas XI yang Diampu</label>
-                                        <input type="text" class="form-control" id="custom_kelas_diampu" name="custom_kelas_diampu" 
-                                               value="{{ old('custom_kelas_diampu', $user->custom_kelas_diampu ?? '') }}" 
-                                               placeholder="Contoh: XI TKJ A, XI TBSM B">
-                                        <div class="form-text">Masukkan spesifikasi kelas yang diampu, pisahkan dengan koma jika lebih dari satu</div>
-                                    </div>
-                                    
-                                    @error('kelas_diampu')
-                                        <div class="text-danger small mt-1">{{ $message }}</div>
+                                    <label class="form-label">Spesifikasi Kelas XI <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control @error('custom_kelas_diampu') is-invalid @enderror" id="custom_kelas_diampu" name="custom_kelas_diampu" 
+                                           value="{{ old('custom_kelas_diampu', $user->custom_kelas_diampu ?? '') }}" 
+                                           placeholder="Contoh: XI TKJ A, XI TBSM B">
+                                    <div class="form-text">Masukkan spesifikasi kelas XI yang diampu (contoh: XI TKJ A, XI TBSM B)</div>
+                                    @error('custom_kelas_diampu')
+                                        <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                     <div class="form-text">Wali kelas hanya akan melihat permohonan PKL dari siswa di kelas yang dipilih</div>
                                 </div>
@@ -253,44 +239,44 @@
                                         <div class="col-md-6">
                                             <div class="form-check mb-2">
                                                 <input class="form-check-input jurusan-diampu" type="checkbox" name="jurusan_diampu[]" value="RPL" id="jurusanRPL"
-                                                    {{ in_array('RPL', old('jurusan_diampu', json_decode($user->jurusan_diampu ?? '[]', true))) ? 'checked' : '' }}>
+                                                    {{ in_array('RPL', old('jurusan_diampu', $user->jurusan_diampu ?? [])) ? 'checked' : '' }}>
                                                 <label class="form-check-label" for="jurusanRPL">RPL (Rekayasa Perangkat Lunak)</label>
                                             </div>
                                             <div class="form-check mb-2">
                                                 <input class="form-check-input jurusan-diampu" type="checkbox" name="jurusan_diampu[]" value="TKJ" id="jurusanTKJ"
-                                                    {{ in_array('TKJ', old('jurusan_diampu', json_decode($user->jurusan_diampu ?? '[]', true))) ? 'checked' : '' }}>
+                                                    {{ in_array('TKJ', old('jurusan_diampu', $user->jurusan_diampu ?? [])) ? 'checked' : '' }}>
                                                 <label class="form-check-label" for="jurusanTKJ">TKJ (Teknik Komputer dan Jaringan)</label>
                                             </div>
                                             <div class="form-check mb-2">
                                                 <input class="form-check-input jurusan-diampu" type="checkbox" name="jurusan_diampu[]" value="MM" id="jurusanMM"
-                                                    {{ in_array('MM', old('jurusan_diampu', json_decode($user->jurusan_diampu ?? '[]', true))) ? 'checked' : '' }}>
+                                                    {{ in_array('MM', old('jurusan_diampu', $user->jurusan_diampu ?? [])) ? 'checked' : '' }}>
                                                 <label class="form-check-label" for="jurusanMM">MM (Multimedia)</label>
                                             </div>
                                             <div class="form-check mb-2">
                                                 <input class="form-check-input jurusan-diampu" type="checkbox" name="jurusan_diampu[]" value="TBSM" id="jurusanTBSM"
-                                                    {{ in_array('TBSM', old('jurusan_diampu', json_decode($user->jurusan_diampu ?? '[]', true))) ? 'checked' : '' }}>
+                                                    {{ in_array('TBSM', old('jurusan_diampu', $user->jurusan_diampu ?? [])) ? 'checked' : '' }}>
                                                 <label class="form-check-label" for="jurusanTBSM">TBSM (Teknik Bisnis Sepeda Motor)</label>
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-check mb-2">
                                                 <input class="form-check-input jurusan-diampu" type="checkbox" name="jurusan_diampu[]" value="TKR" id="jurusanTKR"
-                                                    {{ in_array('TKR', old('jurusan_diampu', json_decode($user->jurusan_diampu ?? '[]', true))) ? 'checked' : '' }}>
+                                                    {{ in_array('TKR', old('jurusan_diampu', $user->jurusan_diampu ?? [])) ? 'checked' : '' }}>
                                                 <label class="form-check-label" for="jurusanTKR">TKR (Teknik Kendaraan Ringan)</label>
                                             </div>
                                             <div class="form-check mb-2">
                                                 <input class="form-check-input jurusan-diampu" type="checkbox" name="jurusan_diampu[]" value="AKL" id="jurusanAKL"
-                                                    {{ in_array('AKL', old('jurusan_diampu', json_decode($user->jurusan_diampu ?? '[]', true))) ? 'checked' : '' }}>
+                                                    {{ in_array('AKL', old('jurusan_diampu', $user->jurusan_diampu ?? [])) ? 'checked' : '' }}>
                                                 <label class="form-check-label" for="jurusanAKL">AKL (Akuntansi dan Keuangan Lembaga)</label>
                                             </div>
                                             <div class="form-check mb-2">
                                                 <input class="form-check-input jurusan-diampu" type="checkbox" name="jurusan_diampu[]" value="OTKP" id="jurusanOTKP"
-                                                    {{ in_array('OTKP', old('jurusan_diampu', json_decode($user->jurusan_diampu ?? '[]', true))) ? 'checked' : '' }}>
+                                                    {{ in_array('OTKP', old('jurusan_diampu', $user->jurusan_diampu ?? [])) ? 'checked' : '' }}>
                                                 <label class="form-check-label" for="jurusanOTKP">OTKP (Otomatisasi dan Tata Kelola Perkantoran)</label>
                                             </div>
                                             <div class="form-check mb-2">
                                                 <input class="form-check-input jurusan-diampu" type="checkbox" name="jurusan_diampu[]" value="BDP" id="jurusanBDP"
-                                                    {{ in_array('BDP', old('jurusan_diampu', json_decode($user->jurusan_diampu ?? '[]', true))) ? 'checked' : '' }}>
+                                                    {{ in_array('BDP', old('jurusan_diampu', $user->jurusan_diampu ?? [])) ? 'checked' : '' }}>
                                                 <label class="form-check-label" for="jurusanBDP">BDP (Bisnis Daring dan Pemasaran)</label>
                                             </div>
                                         </div>
@@ -362,8 +348,8 @@ $(document).ready(function() {
         kelas: '{{ $user->kelas }}',
         jurusan: '{{ $user->jurusan }}',
         is_active: {{ $user->is_active ? 'true' : 'false' }},
-        kelas_diampu: {!! json_encode(is_array($user->kelas_diampu) ? $user->kelas_diampu : json_decode($user->kelas_diampu ?? '[]', true)) !!},
-        jurusan_diampu: {!! json_encode(is_array($user->jurusan_diampu) ? $user->jurusan_diampu : json_decode($user->jurusan_diampu ?? '[]', true)) !!}
+        // kelas_diampu removed - using custom_kelas_diampu only
+        jurusan_diampu: {!! json_encode($user->jurusan_diampu ?? []) !!}
     };
     
     // Toggle password visibility
@@ -400,6 +386,7 @@ $(document).ready(function() {
         kelasField.removeAttr('required');
         jurusanField.removeAttr('required');
         $('#custom_kelas').removeAttr('required');
+        $('#custom_kelas_diampu').removeAttr('required');
         $('.kelas-diampu').removeAttr('required');
         $('.jurusan-diampu').removeAttr('required');
         
@@ -421,11 +408,11 @@ $(document).ready(function() {
             
             // Clear other fields if role has changed
             if (selectedRole !== originalData.role) {
-                $('.kelas-diampu').prop('checked', false);
                 $('.jurusan-diampu').prop('checked', false);
             }
         } else if (selectedRole === 'wali_kelas') {
             waliKelasFields.removeClass('d-none');
+            $('#custom_kelas_diampu').attr('required', true);
             
             // Clear student fields if changing from student role
             if (selectedRole !== originalData.role) {
@@ -456,7 +443,7 @@ $(document).ready(function() {
                 
                 // Clear wali kelas fields if changing from wali kelas role
                 if (originalData.role === 'wali_kelas') {
-                    $('.kelas-diampu').prop('checked', false);
+                    $('#custom_kelas_diampu').val('');
                 }
             }
         } else {
@@ -468,7 +455,7 @@ $(document).ready(function() {
                     jurusanField.val('');
                     $('#custom_kelas').val('');
                 } else if (originalData.role === 'wali_kelas') {
-                    $('.kelas-diampu').prop('checked', false);
+                    $('#custom_kelas_diampu').val('');
                 } else if (originalData.role === 'kaprog') {
                     $('.jurusan-diampu').prop('checked', false);
                 }
@@ -491,17 +478,7 @@ $(document).ready(function() {
         }
     });
     
-    // Handle kelas_diampu checkbox for custom field
-    $('#kelasXI').change(function() {
-        const customKelasDiampuField = $('#customKelasDiampuField');
-        
-        if ($(this).is(':checked')) {
-            customKelasDiampuField.removeClass('d-none');
-        } else {
-            customKelasDiampuField.addClass('d-none');
-            $('#custom_kelas_diampu').val('');
-        }
-    });
+
     
     // Form validation
     $('#editUserForm').submit(function(e) {
@@ -587,17 +564,12 @@ function resetForm() {
         $('#jurusan').val('{{ $user->jurusan }}');
         $('#is_active').prop('checked', {{ $user->is_active ? 'true' : 'false' }});
         
-        // Reset kelas_diampu checkboxes
-        $('.kelas-diampu').each(function() {
-            const value = $(this).val();
-            const originalKelasDiampu = {!! json_encode(is_array($user->kelas_diampu) ? $user->kelas_diampu : json_decode($user->kelas_diampu ?? '[]', true)) !!};
-            $(this).prop('checked', originalKelasDiampu.includes(value));
-        });
+        // kelas_diampu checkboxes removed - using custom_kelas_diampu only
         
         // Reset jurusan_diampu checkboxes
         $('.jurusan-diampu').each(function() {
             const value = $(this).val();
-            const originalJurusanDiampu = {!! json_encode(is_array($user->jurusan_diampu) ? $user->jurusan_diampu : json_decode($user->jurusan_diampu ?? '[]', true)) !!};
+            const originalJurusanDiampu = {!! json_encode($user->jurusan_diampu ?? []) !!};
             $(this).prop('checked', originalJurusanDiampu.includes(value));
         });
         

@@ -243,7 +243,7 @@
                                     
                                     <td>
                                         <div class="dropdown">
-                                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" 
+                                            <button class="btn btn-sm btn-outline-secondary" 
                                                     type="button" data-bs-toggle="dropdown">
                                                 <i class="fas fa-ellipsis-v"></i>
                                             </button>

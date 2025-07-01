@@ -44,16 +44,16 @@ Route::middleware('auth')->group(function () {
     Route::put('/profile', [UserController::class, 'updateProfile'])->name('users.profile.update');
 
     // Siswa Routes (for Wali Kelas)
-    Route::middleware('role:wali_kelas')->group(function() {
+    Route::middleware(['role:wali_kelas', 'validate.siswa.access'])->group(function() {
         Route::get('/siswa', [SiswaController::class, 'index'])->name('siswa.index');
         Route::get('/siswa/{user}', [SiswaController::class, 'show'])->name('siswa.show');
     });
 
     // Permohonan PKL Routes
-    Route::resource('permohonan', PermohonanPklController::class);
-    Route::post('/permohonan/{permohonan}/submit', [PermohonanPklController::class, 'submit'])->name('permohonan.submit');
-    Route::post('/permohonan/{permohonan}/process', [PermohonanPklController::class, 'process'])->name('permohonan.process');
-    Route::get('/permohonan/{permohonan}/print', [PermohonanPklController::class, 'print'])->name('permohonan.print');
+    Route::resource('permohonan', PermohonanPklController::class)->middleware('validate.siswa.access');
+    Route::post('/permohonan/{permohonan}/submit', [PermohonanPklController::class, 'submit'])->name('permohonan.submit')->middleware('validate.siswa.access');
+    Route::post('/permohonan/{permohonan}/process', [PermohonanPklController::class, 'process'])->name('permohonan.process')->middleware('validate.siswa.access');
+    Route::get('/permohonan/{permohonan}/print', [PermohonanPklController::class, 'print'])->name('permohonan.print')->middleware('validate.siswa.access');
     Route::patch('/permohonan/{permohonan}/update-pembimbing', [PermohonanPklController::class, 'updatePembimbing'])->name('permohonan.updatePembimbing')->middleware('role:hubin');
 
     // Notifikasi Routes
@@ -71,4 +71,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/users-export', [UserController::class, 'export'])->name('users.export');
         Route::post('/users-import', [UserController::class, 'import'])->name('users.import');
     });
+    
+    // Debug routes (temporary)
+    Route::get('/debug/siswa-access', [App\Http\Controllers\DebugController::class, 'debugSiswaAccess'])->name('debug.siswa.access');
+    Route::get('/debug/siswa-access-view', [App\Http\Controllers\DebugController::class, 'debugSiswaAccessView'])->name('debug.siswa.access.view');
 });

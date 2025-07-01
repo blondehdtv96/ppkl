@@ -148,6 +148,44 @@
                     </div>
                 </div>
                 @endif
+                
+                @if($user->role === 'wali_kelas')
+                <hr>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="mb-3">
+                            <label class="form-label text-muted small">Kelas yang Diampu</label>
+                            <div class="fw-bold">
+                                @if($user->custom_kelas_diampu)
+                                    <span class="badge bg-primary me-1 mb-1">{{ $user->custom_kelas_diampu }}</span>
+                                @else
+                                    <span class="text-muted">Belum ada kelas yang diampu</span>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @endif
+                
+                @if($user->role === 'kaprog')
+                <hr>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="mb-3">
+                            <label class="form-label text-muted small">Jurusan yang Diampu</label>
+                            <div class="fw-bold">
+                                @if($user->jurusan_diampu && count($user->jurusan_diampu) > 0)
+                                    @foreach($user->jurusan_diampu as $jurusan)
+                                        <span class="badge bg-success me-1 mb-1">{{ $jurusan }}</span>
+                                    @endforeach
+                                @else
+                                    <span class="text-muted">Belum ada jurusan yang diampu</span>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @endif
             </div>
         </div>
         
@@ -309,35 +347,7 @@
                     </div>
                     @endif
                     
-                    @if($user->role === 'wali_kelas')
-                    <hr>
-                    <h6 class="mb-3">Kelas yang Diampu</h6>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="mb-3">
-                                <div class="form-text mb-2">Pilih kelas yang diampu oleh wali kelas ini</div>
-                                <div class="d-flex flex-wrap gap-3">
-                                    @php
-                                        $kelasOptions = ['X', 'XI', 'XII'];
-                                        $kelasArray = is_array($user->kelas_diampu) ? $user->kelas_diampu : json_decode($user->kelas_diampu ?? '[]', true);
-                                    @endphp
-                                    
-                                    @foreach($kelasOptions as $kelas)
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" 
-                                                   name="kelas_diampu[]" value="{{ $kelas }}" id="kelas_{{ $kelas }}"
-                                                   {{ in_array($kelas, $kelasArray) ? 'checked' : '' }}>
-                                            <label class="form-check-label" for="kelas_{{ $kelas }}">{{ $kelas }}</label>
-                                        </div>
-                                    @endforeach
-                                </div>
-                                @error('kelas_diampu')
-                                    <div class="text-danger small mt-1">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
-                    </div>
-                    @endif
+                    {{-- kelas_diampu form section removed - using custom_kelas_diampu only --}}
                     
                     @if($user->role === 'kaprog')
                     <hr>
@@ -349,7 +359,7 @@
                                 <div class="d-flex flex-wrap gap-3">
                                     @php
                                         $jurusanOptions = ['RPL', 'TKJ', 'MM', 'TBSM', 'TKR', 'AKL', 'OTKP', 'BDP'];
-                                        $jurusanArray = is_array($user->jurusan_diampu) ? $user->jurusan_diampu : json_decode($user->jurusan_diampu ?? '[]', true);
+                                        $jurusanArray = $user->jurusan_diampu ?? [];
                                     @endphp
                                     
                                     @foreach($jurusanOptions as $jurusan)

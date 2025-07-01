@@ -49,7 +49,7 @@
                     <option value="disetujui_kaprog" {{ request('status') == 'disetujui_kaprog' ? 'selected' : '' }}>Disetujui Kaprog</option>
                     <option value="ditolak_tu" {{ request('status') == 'ditolak_tu' ? 'selected' : '' }}>Ditolak TU</option>
                     <option value="disetujui_tu" {{ request('status') == 'disetujui_tu' ? 'selected' : '' }}>Disetujui TU</option>
-                    <option value="dicetak_hubin" {{ request('status') == 'dicetak_hubin' ? 'selected' : '' }}>Dicetak Hubin</option>
+                    <option value="dicetak_hubin" {{ request('status') == 'dicetak_hubin' ? 'selected' : '' }}>Disetujui Hubin</option>
                 </select>
             </div>
             
@@ -67,7 +67,7 @@
             </div>
             @endif
             
-            @if(auth()->user()->role === 'admin' || (auth()->user()->role === 'wali_kelas' && !empty(auth()->user()->kelas_diampu)))
+            @if(auth()->user()->role === 'admin' || (auth()->user()->role === 'wali_kelas' && auth()->user()->custom_kelas_diampu))
             <div class="col-md-2">
                 <label for="kelas" class="form-label">Kelas</label>
                 <select class="form-select" id="kelas" name="kelas">
@@ -77,7 +77,10 @@
                         <option value="XI" {{ request('kelas') == 'XI' ? 'selected' : '' }}>XI</option>
                         <option value="XII" {{ request('kelas') == 'XII' ? 'selected' : '' }}>XII</option>
                     @else
-                        @foreach(auth()->user()->kelas_diampu as $kelas)
+                        @php
+                            $kelasArray = array_map('trim', explode(',', auth()->user()->custom_kelas_diampu));
+                        @endphp
+                        @foreach($kelasArray as $kelas)
                             <option value="{{ $kelas }}" {{ request('kelas') == $kelas ? 'selected' : '' }}>{{ $kelas }}</option>
                         @endforeach
                     @endif

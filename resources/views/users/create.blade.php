@@ -182,30 +182,17 @@
                             <div class="card-body">
                                 <div class="mb-3">
                                     <div class="form-text mb-2">
-                                        Pilih kelas yang diampu oleh wali kelas ini. Wali kelas hanya akan melihat permohonan PKL dari siswa di kelas yang dipilih.
-                                    </div>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" id="kelasXI" 
-                                               name="kelas_diampu[]" value="XI" {{ in_array('XI', old('kelas_diampu', [])) ? 'checked' : '' }}>
-                                        <label class="form-check-label" for="kelasXI">Kelas XI</label>
+                                        Masukkan spesifikasi kelas XI yang diampu oleh wali kelas ini. Wali kelas hanya akan melihat permohonan PKL dari siswa di kelas yang dipilih.
                                     </div>
                                     
-                                    <!-- Custom Kelas Diampu Field -->
-                                    <div id="customKelasDiampuField" class="mt-3 {{ in_array('XI', old('kelas_diampu', [])) ? '' : 'd-none' }}">
-                                        <label for="custom_kelas_diampu" class="form-label">Spesifikasi Kelas XI <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control @error('custom_kelas_diampu') is-invalid @enderror" 
-                                               id="custom_kelas_diampu" name="custom_kelas_diampu" 
-                                               value="{{ old('custom_kelas_diampu') }}" 
-                                               placeholder="Contoh: XI TKJ A, XI TBSM B" 
-                                               {{ in_array('XI', old('kelas_diampu', [])) ? 'required' : '' }}>
-                                        <div class="form-text">Masukkan spesifikasi kelas XI yang diampu (contoh: XI TKJ A, XI TBSM B)</div>
-                                        @error('custom_kelas_diampu')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-                                    
-                                    @error('kelas_diampu')
-                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                    <label for="custom_kelas_diampu" class="form-label">Spesifikasi Kelas XI <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control @error('custom_kelas_diampu') is-invalid @enderror" 
+                                           id="custom_kelas_diampu" name="custom_kelas_diampu" 
+                                           value="{{ old('custom_kelas_diampu') }}" 
+                                           placeholder="Contoh: XI TKJ A, XI TBSM B">
+                                    <div class="form-text">Masukkan spesifikasi kelas XI yang diampu (contoh: XI TKJ A, XI TBSM B)</div>
+                                    @error('custom_kelas_diampu')
+                                        <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
                             </div>
@@ -346,6 +333,7 @@ $(document).ready(function() {
         // Remove required attribute from all fields
         $('#nis, #kelas, #jurusan').removeAttr('required');
         $('#custom_kelas').removeAttr('required');
+        $('#custom_kelas_diampu').removeAttr('required');
         
         // Show fields based on selected role
         if (selectedRole === 'siswa') {
@@ -364,6 +352,7 @@ $(document).ready(function() {
             }
         } else if (selectedRole === 'wali_kelas') {
             waliKelasFields.removeClass('d-none');
+            $('#custom_kelas_diampu').attr('required', true);
         } else if (selectedRole === 'kaprog') {
             kaprogFields.removeClass('d-none');
         }
@@ -377,7 +366,7 @@ $(document).ready(function() {
         }
         
         if (selectedRole !== 'wali_kelas') {
-            $('input[name="kelas_diampu[]"]').prop('checked', false);
+            $('#custom_kelas_diampu').val('');
         }
         
         if (selectedRole !== 'kaprog') {
@@ -400,20 +389,8 @@ $(document).ready(function() {
         }
     });
     
-    // Handle kelasXI checkbox for custom kelas diampu input
-    $('#kelasXI').change(function() {
-        if ($(this).is(':checked')) {
-            $('#customKelasDiampuField').removeClass('d-none');
-            $('#custom_kelas_diampu').attr('required', true);
-        } else {
-            $('#customKelasDiampuField').addClass('d-none');
-            $('#custom_kelas_diampu').removeAttr('required').val('');
-        }
-    });
-    
     // Trigger change event on page load to handle old input
     $('#role').trigger('change');
-    $('#kelasXI').trigger('change');
     
     // Form validation
     $('#createUserForm').submit(function(e) {
@@ -467,9 +444,10 @@ function resetForm() {
         $('.is-invalid').removeClass('is-invalid');
         $('.invalid-feedback').remove();
         
-        // Reset checkboxes for kelas_diampu and jurusan_diampu
-        $('input[name="kelas_diampu[]"]').prop('checked', false);
+        // Reset checkboxes for jurusan_diampu
         $('input[name="jurusan_diampu[]"]').prop('checked', false);
+        // Reset custom kelas diampu field
+        $('#custom_kelas_diampu').val('');
     }
 }
 </script>

@@ -34,7 +34,7 @@
                     <p class="mb-1"><strong>{{ $lastRejection->getStatusLabel() }}</strong></p>
                     <p class="mb-1">{{ $lastRejection->keterangan }}</p>
                     <small class="text-muted">
-                        Ditolak oleh {{ $lastRejection->processor->name }} pada {{ $lastRejection->created_at->format('d F Y H:i') }}
+                        Ditolak oleh {{ $lastRejection->processor->name }} ({{ $lastRejection->getRoleProcessorLabelAttribute() }}) pada {{ $lastRejection->created_at->format('d F Y H:i') }}
                     </small>
                 </div>
                 @endif

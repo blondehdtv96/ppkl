@@ -41,6 +41,19 @@
             align-items: center;
             justify-content: center;
         }
+        /* Consistent icon sizing */
+        .fas, .far, .fab {
+            font-size: 1rem;
+        }
+        .btn .fas, .btn .far, .btn .fab {
+            font-size: 0.875rem;
+        }
+        .btn-sm .fas, .btn-sm .far, .btn-sm .fab {
+            font-size: 0.75rem;
+        }
+        .btn-lg .fas, .btn-lg .far, .btn-lg .fab {
+            font-size: 1.125rem;
+        }
     </style>
     @stack('styles')
 </head>
