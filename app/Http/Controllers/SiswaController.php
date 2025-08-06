@@ -13,22 +13,42 @@ class SiswaController extends Controller
     {
         $user = Auth::user();
         
-        // Hanya wali kelas yang bisa mengakses halaman ini
-        if (!$user->isWaliKelas()) {
+        // Hanya wali kelas dan kaprog yang bisa mengakses halaman ini
+        if (!$user->isWaliKelas() && !$user->isKaprog()) {
             abort(403, 'Unauthorized action.');
         }
         
         $query = User::where('role', 'siswa');
         
-        // Filter siswa berdasarkan kelas yang diampu oleh wali kelas
-        // Wali kelas hanya bisa melihat siswa dari kelas yang secara eksplisit diberikan akses
-        if ($user->custom_kelas_diampu) {
-            // Parse kelas yang diampu (bisa multiple, dipisah koma)
-            $kelasArray = array_map('trim', explode(',', $user->custom_kelas_diampu));
-            $query->whereIn('kelas', $kelasArray);
-        } else {
-            // Jika tidak ada kelas yang diampu, tidak tampilkan siswa apapun
-            $query->whereRaw('1 = 0'); // Kondisi yang selalu false
+        if ($user->isWaliKelas()) {
+            // Filter siswa berdasarkan kelas yang diampu oleh wali kelas
+            if ($user->custom_kelas_diampu) {
+                $kelasArray = array_map('trim', explode(',', $user->custom_kelas_diampu));
+                $query->whereIn('kelas', $kelasArray);
+            } else {
+                $query->whereRaw('1 = 0');
+            }
+        }
+        if ($user->isKaprog()) {
+            // Filter siswa berdasarkan jurusan yang diampu oleh kaprog
+            if ($user->jurusan_diampu && is_array($user->jurusan_diampu)) {
+                if ($request->filled('jurusan')) {
+                    // Jika ada filter jurusan, pastikan hanya jurusan yang diampu
+                    if (in_array($request->jurusan, $user->jurusan_diampu)) {
+                        $query->where('jurusan', $request->jurusan);
+                    } else {
+                        $query->whereRaw('1 = 0');
+                    }
+                } else {
+                    $query->whereIn('jurusan', $user->jurusan_diampu);
+                }
+                // Filter kelas hanya untuk siswa dengan jurusan yang diampu
+                if ($request->filled('kelas')) {
+                    $query->where('kelas', 'like', "%{$request->kelas}%");
+                }
+            } else {
+                $query->whereRaw('1 = 0');
+            }
         }
         
         // Filter pencarian
@@ -76,13 +96,18 @@ class SiswaController extends Controller
     {
         $user = Auth::user();
         
-        // Hanya wali kelas yang bisa mengakses halaman ini
-        if (!$user->isWaliKelas()) {
+        // Hanya wali kelas dan kaprog yang bisa mengakses halaman ini
+        if (!$user->isWaliKelas() && !$user->isKaprog()) {
             abort(403, 'Unauthorized action.');
         }
         
-        // Pastikan siswa yang dilihat adalah siswa yang berada di kelas yang diampu
-        // Wali kelas hanya bisa melihat siswa dari kelas yang secara eksplisit diberikan akses
+        // Pastikan siswa yang dilihat adalah siswa yang berada di kelas/jurusan yang diampu
+        if ($user->isKaprog()) {
+            // Kaprog hanya bisa melihat siswa dengan jurusan yang diampu
+            if (!in_array($siswa->jurusan, $user->jurusan_diampu ?? [])) {
+                abort(403, 'Anda tidak memiliki akses untuk melihat siswa ini.');
+            }
+        }
         if (!$user->canViewSiswa($siswa)) {
             abort(403, 'Anda tidak memiliki akses untuk melihat siswa ini.');
         }

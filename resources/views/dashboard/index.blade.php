@@ -265,6 +265,103 @@
         </div>
     @else
         <!-- Staff Dashboard (Wali Kelas, BP, Kaprog, TU, Hubin) -->
+    @if(auth()->user()->role == 'kaprog')
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card shadow border-0">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-users me-2"></i> Data Siswa Berdasarkan Jurusan & Kelas</h5>
+                </div>
+                <div class="card-body">
+                    <form method="GET" action="{{ route('dashboard') }}" class="row g-3 align-items-end">
+                        <div class="col-md-4">
+                            <label class="form-label">Jurusan</label>
+                            <select class="form-select" name="jurusan">
+                                <option value="">Semua Jurusan</option>
+                                @foreach(auth()->user()->jurusan_diampu ?? [] as $jurusan)
+                                    <option value="{{ $jurusan }}" {{ request('jurusan') == $jurusan ? 'selected' : '' }}>{{ $jurusan }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Kelas</label>
+                            <input type="text" class="form-control" name="kelas" value="{{ request('kelas') }}" placeholder="Contoh: XI TKJ A">
+                        </div>
+                        <div class="col-md-4">
+                            <button type="submit" class="btn btn-primary w-100"><i class="fas fa-search me-2"></i> Cari</button>
+                        </div>
+                    </form>
+                    @php
+                        $kaprog = auth()->user();
+                        $query = \App\Models\User::where('role', 'siswa');
+                        if ($kaprog->jurusan_diampu && is_array($kaprog->jurusan_diampu)) {
+                            if (request('jurusan')) {
+                                if (in_array(request('jurusan'), $kaprog->jurusan_diampu)) {
+                                    $query->where('jurusan', request('jurusan'));
+                                } else {
+                                    $query->whereRaw('1 = 0');
+                                }
+                            } else {
+                                $query->whereIn('jurusan', $kaprog->jurusan_diampu);
+                            }
+                            if (request('kelas')) {
+                                $query->where('kelas', 'like', "%" . request('kelas') . "%");
+                            }
+                        } else {
+                            $query->whereRaw('1 = 0');
+                        }
+                        $siswaKaprog = $query->orderBy('kelas', 'asc')->orderBy('name', 'asc')->get();
+                    @endphp
+                    <div class="table-responsive mt-4">
+                        <table class="table table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Nama</th>
+                                    <th>Kelas</th>
+                                    <th>Jurusan</th>
+                                    <th>NIS</th>
+                                    <th>Status</th>
+                                    <th>Status Permohonan PKL</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($siswaKaprog as $siswa)
+                                <tr>
+                                    <td>{{ $siswa->name }}</td>
+                                    <td>{{ $siswa->kelas }}</td>
+                                    <td>{{ $siswa->jurusan }}</td>
+                                    <td>{{ $siswa->nis }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ $siswa->is_active ? 'success' : 'danger' }}">
+                                            {{ $siswa->is_active ? 'Aktif' : 'Nonaktif' }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        @php
+                                            $latestPermohonan = $siswa->permohonanPkl()->latest()->first();
+                                        @endphp
+                                        @if($latestPermohonan)
+                                            <span class="badge bg-{{ $latestPermohonan->status_color ?? 'secondary' }}">
+                                                {{ $latestPermohonan->status_label ?? $latestPermohonan->status }}
+                                            </span>
+                                        @else
+                                            <span class="text-muted">Belum ada permohonan</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted">Tidak ada data siswa ditemukan.</td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
         <div class="row">
             <div class="col-xl-4 col-md-6 mb-4">
                 <div class="card border-left-warning shadow h-100 py-2">
