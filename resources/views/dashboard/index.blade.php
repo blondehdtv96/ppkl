@@ -219,7 +219,24 @@
                                     <tr>
                                         <td>{{ $permohonan->created_at->format('d M Y') }}</td>
                                         <td>
-                                            <span class="badge badge-{{ $permohonan->status_color }}">{{ $permohonan->status_label }}</span>
+                                            @php
+                                                $colorMap = [
+                                                    'draft' => 'text-secondary',
+                                                    'diajukan' => 'text-info',
+                                                    'disetujui_wali' => 'text-primary',
+                                                    'disetujui_bp' => 'text-success',
+                                                    'disetujui_kaprog' => 'text-success',
+                                                    'disetujui_tu' => 'text-success',
+                                                    'disetujui_hubin' => 'text-success',
+                                                    'ditolak_wali' => 'text-danger',
+                                                    'ditolak_bp' => 'text-danger',
+                                                    'ditolak_kaprog' => 'text-danger',
+                                                    'ditolak_tu' => 'text-danger',
+                                                    'ditolak_hubin' => 'text-danger',
+                                                ];
+                                                $textColor = $colorMap[$permohonan->status] ?? 'text-dark';
+                                            @endphp
+                                            <span class="fw-bold {{ $textColor }}">{{ $permohonan->status_label }}</span>
                                         </td>
                                         <td>
                                             <a href="{{ route('permohonan.show', $permohonan->id) }}" class="btn btn-sm btn-info">
@@ -274,20 +291,29 @@
                 </div>
                 <div class="card-body">
                     <form method="GET" action="{{ route('dashboard') }}" class="row g-3 align-items-end">
-                        <div class="col-md-4">
-                            <label class="form-label">Jurusan</label>
-                            <select class="form-select" name="jurusan">
-                                <option value="">Semua Jurusan</option>
-                                @foreach(auth()->user()->jurusan_diampu ?? [] as $jurusan)
-                                    <option value="{{ $jurusan }}" {{ request('jurusan') == $jurusan ? 'selected' : '' }}>{{ $jurusan }}</option>
-                                @endforeach
+                        <div class="col-md-6">
+                            <label class="form-label">Status Permohonan PKL</label>
+                            <select class="form-select" name="status_permohonan">
+                                <option value="">Semua Status</option>
+                                <option value="draft" {{ request('status_permohonan') == 'draft' ? 'selected' : '' }}>Draft</option>
+                                <option value="diajukan" {{ request('status_permohonan') == 'diajukan' ? 'selected' : '' }}>Diajukan</option>
+                                <option value="disetujui_wali" {{ request('status_permohonan') == 'disetujui_wali' ? 'selected' : '' }}>Disetujui Wali Kelas</option>
+                                <option value="disetujui_bp" {{ request('status_permohonan') == 'disetujui_bp' ? 'selected' : '' }}>Disetujui BP</option>
+                                <option value="disetujui_kaprog" {{ request('status_permohonan') == 'disetujui_kaprog' ? 'selected' : '' }}>Disetujui Kaprog</option>
+                                <option value="disetujui_tu" {{ request('status_permohonan') == 'disetujui_tu' ? 'selected' : '' }}>Disetujui TU</option>
+                                <option value="disetujui_hubin" {{ request('status_permohonan') == 'disetujui_hubin' ? 'selected' : '' }}>Disetujui Hubin</option>
+                                <option value="ditolak_wali" {{ request('status_permohonan') == 'ditolak_wali' ? 'selected' : '' }}>Ditolak Wali Kelas</option>
+                                <option value="ditolak_bp" {{ request('status_permohonan') == 'ditolak_bp' ? 'selected' : '' }}>Ditolak BP</option>
+                                <option value="ditolak_kaprog" {{ request('status_permohonan') == 'ditolak_kaprog' ? 'selected' : '' }}>Ditolak Kaprog</option>
+                                <option value="ditolak_tu" {{ request('status_permohonan') == 'ditolak_tu' ? 'selected' : '' }}>Ditolak TU</option>
+                                <option value="ditolak_hubin" {{ request('status_permohonan') == 'ditolak_hubin' ? 'selected' : '' }}>Ditolak Hubin</option>
                             </select>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <label class="form-label">Kelas</label>
                             <input type="text" class="form-control" name="kelas" value="{{ request('kelas') }}" placeholder="Contoh: XI TKJ A">
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-12">
                             <button type="submit" class="btn btn-primary w-100"><i class="fas fa-search me-2"></i> Cari</button>
                         </div>
                     </form>
@@ -295,15 +321,7 @@
                         $kaprog = auth()->user();
                         $query = \App\Models\User::where('role', 'siswa');
                         if ($kaprog->jurusan_diampu && is_array($kaprog->jurusan_diampu)) {
-                            if (request('jurusan')) {
-                                if (in_array(request('jurusan'), $kaprog->jurusan_diampu)) {
-                                    $query->where('jurusan', request('jurusan'));
-                                } else {
-                                    $query->whereRaw('1 = 0');
-                                }
-                            } else {
-                                $query->whereIn('jurusan', $kaprog->jurusan_diampu);
-                            }
+                            $query->whereIn('jurusan', $kaprog->jurusan_diampu);
                             if (request('kelas')) {
                                 $query->where('kelas', 'like', "%" . request('kelas') . "%");
                             }
@@ -311,6 +329,13 @@
                             $query->whereRaw('1 = 0');
                         }
                         $siswaKaprog = $query->orderBy('kelas', 'asc')->orderBy('name', 'asc')->get();
+                        // Filter siswa berdasarkan status permohonan PKL
+                        if(request('status_permohonan')) {
+                            $siswaKaprog = $siswaKaprog->filter(function($siswa) {
+                                $latestPermohonan = $siswa->permohonanPkl()->latest()->first();
+                                return $latestPermohonan && $latestPermohonan->status == request('status_permohonan');
+                            });
+                        }
                     @endphp
                     <div class="table-responsive mt-4">
                         <table class="table table-bordered">
@@ -318,7 +343,6 @@
                                 <tr>
                                     <th>Nama</th>
                                     <th>Kelas</th>
-                                    <th>Jurusan</th>
                                     <th>NIS</th>
                                     <th>Status</th>
                                     <th>Status Permohonan PKL</th>
@@ -329,7 +353,6 @@
                                 <tr>
                                     <td>{{ $siswa->name }}</td>
                                     <td>{{ $siswa->kelas }}</td>
-                                    <td>{{ $siswa->jurusan }}</td>
                                     <td>{{ $siswa->nis }}</td>
                                     <td>
                                         <span class="badge bg-{{ $siswa->is_active ? 'success' : 'danger' }}">
@@ -351,7 +374,7 @@
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="6" class="text-center text-muted">Tidak ada data siswa ditemukan.</td>
+                                    <td colspan="5" class="text-center text-muted">Tidak ada data siswa ditemukan.</td>
                                 </tr>
                                 @endforelse
                             </tbody>

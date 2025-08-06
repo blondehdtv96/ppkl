@@ -49,7 +49,7 @@
                     <option value="disetujui_kaprog" {{ request('status') == 'disetujui_kaprog' ? 'selected' : '' }}>Disetujui Kaprog</option>
                     <option value="ditolak_tu" {{ request('status') == 'ditolak_tu' ? 'selected' : '' }}>Ditolak TU</option>
                     <option value="disetujui_tu" {{ request('status') == 'disetujui_tu' ? 'selected' : '' }}>Disetujui TU</option>
-                    <option value="dicetak_hubin" {{ request('status') == 'dicetak_hubin' ? 'selected' : '' }}>Disetujui Hubin</option>
+                    <option value="dicetak_hubin" {{ request('status') == 'dicetak_hubin' ? 'selected' : '' }}>Dicetak Hubin</option>
                 </select>
             </div>
             
