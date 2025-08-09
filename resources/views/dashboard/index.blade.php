@@ -98,7 +98,24 @@
                                         <td>{{ $permohonan->user->name }}</td>
                                         <td>{{ $permohonan->created_at->format('d M Y') }}</td>
                                         <td>
-                                            <span class="badge badge-{{ $permohonan->status_color }}">{{ $permohonan->status_label }}</span>
+                                            @php
+                                                $colorMap = [
+                                                    'draft' => 'text-secondary',
+                                                    'diajukan' => 'text-info',
+                                                    'disetujui_wali' => 'text-primary',
+                                                    'disetujui_bp' => 'text-success',
+                                                    'disetujui_kaprog' => 'text-success',
+                                                    'disetujui_tu' => 'text-success',
+                                                    'disetujui_hubin' => 'text-success',
+                                                    'ditolak_wali' => 'text-danger',
+                                                    'ditolak_bp' => 'text-danger',
+                                                    'ditolak_kaprog' => 'text-danger',
+                                                    'ditolak_tu' => 'text-danger',
+                                                    'ditolak_hubin' => 'text-danger',
+                                                ];
+                                                $textColor = $colorMap[$permohonan->status] ?? 'text-dark';
+                                            @endphp
+                                            <span class="fw-bold {{ $textColor }}">{{ $permohonan->status_label }}</span>
                                         </td>
                                         <td>
                                             <a href="{{ route('permohonan.show', $permohonan->id) }}" class="btn btn-sm btn-info">
