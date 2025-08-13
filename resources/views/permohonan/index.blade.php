@@ -485,12 +485,38 @@
 </div>
 
 <!-- Quick Stats -->
-@if(auth()->user()->role !== 'siswa' && $permohonan->count() > 0)
+@if(auth()->user()->role !== 'siswa')
+@php
+    $allPermohonan = \App\Models\PermohonanPkl::query();
+    if(auth()->user()->role === 'admin') {
+        // admin: semua data
+    } elseif(auth()->user()->role === 'kaprog') {
+        $allPermohonan->whereHas('user', function($q) {
+            $q->whereIn('jurusan', auth()->user()->jurusan_diampu ?? []);
+        });
+    } // tambahkan else if lain jika perlu
+    $menunggu = (clone $allPermohonan)->where('status', 'diajukan')->count();
+    $disetujui = (clone $allPermohonan)->where(function($q){
+        $q->where('status', 'disetujui_wali')
+          ->orWhere('status', 'disetujui_bp')
+          ->orWhere('status', 'disetujui_kaprog')
+          ->orWhere('status', 'disetujui_tu')
+          ->orWhere('status', 'disetujui_hubin');
+    })->count();
+    $ditolak = (clone $allPermohonan)->where(function($q){
+        $q->where('status', 'ditolak_wali')
+          ->orWhere('status', 'ditolak_bp')
+          ->orWhere('status', 'ditolak_kaprog')
+          ->orWhere('status', 'ditolak_tu')
+          ->orWhere('status', 'ditolak_hubin');
+    })->count();
+    $selesai = (clone $allPermohonan)->where('status', 'dicetak_hubin')->count();
+@endphp
 <div class="row mt-4">
     <div class="col-md-3">
         <div class="card bg-light">
             <div class="card-body text-center">
-                <h4 class="text-primary">{{ $stats['menunggu'] ?? 0 }}</h4>
+                <h4 class="text-primary">{{ $menunggu }}</h4>
                 <small class="text-muted">Menunggu Proses</small>
             </div>
         </div>
@@ -498,7 +524,7 @@
     <div class="col-md-3">
         <div class="card bg-light">
             <div class="card-body text-center">
-                <h4 class="text-success">{{ $stats['disetujui'] ?? 0 }}</h4>
+                <h4 class="text-success">{{ $disetujui }}</h4>
                 <small class="text-muted">Disetujui</small>
             </div>
         </div>
@@ -506,7 +532,7 @@
     <div class="col-md-3">
         <div class="card bg-light">
             <div class="card-body text-center">
-                <h4 class="text-danger">{{ $stats['ditolak'] ?? 0 }}</h4>
+                <h4 class="text-danger">{{ $ditolak }}</h4>
                 <small class="text-muted">Ditolak</small>
             </div>
         </div>
@@ -514,7 +540,7 @@
     <div class="col-md-3">
         <div class="card bg-light">
             <div class="card-body text-center">
-                <h4 class="text-info">{{ $stats['selesai'] ?? 0 }}</h4>
+                <h4 class="text-info">{{ $selesai }}</h4>
                 <small class="text-muted">Selesai</small>
             </div>
         </div>
