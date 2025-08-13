@@ -3,19 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Surat Permohonan PKL - {{ $permohonan->siswa->name }}</title>
+    <title>Surat Permohonan PKL</title>
     <style>
         @page {
-            margin: 2.5cm 2.5cm 2.5cm 2.5cm;
+            size: A3;
+            margin: 2.5cm 3.5cm 2.5cm 3.5cm;
         }
-        
         body {
             font-family: 'Times New Roman', Times, serif;
-            font-size: 12pt;
-            line-height: 1.5;
+            font-size: 13pt;
+            line-height: 1.8;
             color: #000;
             margin: 0;
             padding: 0;
+        }
+        .surat-container {
+            max-width: 32cm;
+            margin: 0 auto;
+            background: #fff;
+            padding: 0 2.5cm 0 2.5cm;
         }
         
         .container {
@@ -172,110 +178,109 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Header -->
-        <div class="header">
-            <img src="{{ asset('img/logo-sekolah.png') }}" alt="Logo Sekolah" class="logo">
-            <h1 class="school-name">SMK NEGERI 1 CONTOH</h1>
-            <p class="school-address">
-                Jalan Pendidikan No. 123, Kecamatan Contoh, Kota Contoh, Provinsi Contoh<br>
-                Telepon: (021) 1234567, Email: info@smkn1contoh.sch.id, Website: www.smkn1contoh.sch.id
-            </p>
+    <div class="surat-container">
+        <table style="width:100%; border:0;">
+            <tr>
+                <td style="width:110px; text-align:center; vertical-align:top;">
+                    <img src="{{ asset('1.png') }}" alt="Logo SMK BINA MANDIRI" style="height:90px; width:auto; display:block; margin:auto;">
+                </td>
+                <td style="vertical-align:middle; text-align:center; padding-left:0;">
+                    <div style="font-family:'Times New Roman', Times, serif; color:#15397f; text-align:center;">
+                        <div style="font-size:16pt; font-weight:700; letter-spacing:0.5px; text-transform:uppercase; line-height:1.2;">YAYASAN PENDIDIKAN BINA MANDIRI</div>
+                        <div style="font-size:23pt; font-weight:900; letter-spacing:1px; text-transform:uppercase; line-height:1.1; margin-top:2px;">SMK BINA MANDIRI BEKASI</div>
+                        <div style="font-size:13pt; font-weight:600; letter-spacing:0.5px; text-transform:uppercase; line-height:1.1; margin-top:2px;">KELOMPOK TERPADU</div>
+                        <div style="font-size:18pt; font-weight:900; letter-spacing:0.5px; color:#15397f; text-transform:uppercase; line-height:1.1; margin-top:2px;">TERAKREDITASI "A"</div>
+                    </div>
+                </td>
+            </tr>
+        </table>
+        <div style="width:100%; background:#17408B; color:#000; font-size:10pt; font-family:'Times New Roman', Times, serif; padding:4px 0 4px 0; margin-top:8px; margin-bottom:16px; text-align:center; border-radius:2px;">
+            Jl. Bintara IX No.32 Bekasi Barat 17134 Telp: (021) 88860866, Fax : (021) 88860057 E-mail : smkbinamandiribks@gmail.com, Website : www.smkbinamandiribks.sch.id
         </div>
-        
-        <!-- Letter Info -->
-        <div class="letter-info">
-            <div class="letter-number">
-                <p>Nomor: {{ $permohonan->nomor_surat ?? 'PKL/' . str_pad($permohonan->id, 3, '0', STR_PAD_LEFT) . '/' . date('m') . '/' . date('Y') }}</p>
-                <p>Lampiran: -</p>
-                <p>Hal: Permohonan Praktik Kerja Lapangan</p>
-            </div>
-            
-            <div class="letter-date">
-                <p>{{ $permohonan->tanggal_surat ? $permohonan->tanggal_surat->format('d F Y') : now()->format('d F Y') }}</p>
-            </div>
-            
-            <div class="clear"></div>
+    <table style="width:100%; border:0; margin-bottom: 8px;">
+        <tr>
+            <td style="width:60%;">
+                Nomor :
+                @php
+                    // Nomor surat otomatis: 423/PKL/{id}/{bulan}/{tahun}
+                    $nomorSurat = $nomor_surat ?? ($permohonan->nomor_surat ?? null);
+                    if (!$nomorSurat && isset($permohonan->id)) {
+                        $bulan = \Carbon\Carbon::parse($permohonan->created_at ?? now())->format('m');
+                        $tahun = \Carbon\Carbon::parse($permohonan->created_at ?? now())->format('Y');
+                        $nomorSurat = '423/PKL/' . str_pad($permohonan->id, 3, '0', STR_PAD_LEFT) . '/' . $bulan . '/' . $tahun;
+                    }
+                @endphp
+                {{ $nomorSurat ?? '-' }}
+            </td>
+            <td style="text-align:right;">Bekasi, {{ $tanggal_surat ?? (\Carbon\Carbon::now()->translatedFormat('d F Y')) }}</td>
+        </tr>
+        <tr>
+            <td>Lamp : {{ $lampiran ?? '1 Lbr' }}</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Perihal : <b>{{ $perihal ?? 'Permohonan PKL' }}</b></td>
+            <td></td>
+        </tr>
+    </table>
+    <div style="margin-bottom: 16px;">
+        Kepada Yth :<br>
+    Bpk/Ibu Pimpinan<br>
+    <b>{{ $nama_perusahaan ?? 'PT. Bintang Teknologi Pratama' }}</b><br>
+    {{ $alamat_perusahaan ?? 'Jl. Pulo Ribung No.06, Jakasetia, Bekasi Selatan, Kota Bekasi' }}
+    </div>
+    <div class="isi" style="margin-top: 20px; text-align:justify;">
+        <p style="text-indent: 1.1cm; margin-bottom: 10px; font-size:11pt;">Dengan Hormat,</p>
+        <p style="text-indent: 1.1cm; margin-bottom: 10px; font-size:11pt;">
+            Dalam rangka pelaksanaan Pendidikan Sistem Ganda sesuai dengan UU <b>No.20 Tahun 2003</b> tentang <b>Pendidikan Nasional</b> dan <b>Peraturan Menteri Perindustrian Nomor 03/M-IND/PER/I/2017</b> tentang pedoman pembinaan dan pengembangan Sekolah Menengah Kejuruan Berbasis Kompetensi yang Link and Match dengan Industri dalam meningkatkan kompetensi tamatan Sekolah Menengah Kejuruan (SMK), dan sesuai Program Kurikulum serta Hubungan Industri SMK Bina Mandiri Bekasi, maka peserta didik SMK Bina Mandiri Bekasi wajib melaksanakan Praktik Kerja Lapangan (PKL) di Perusahaan/Instansi kurang lebih selama <b>3 (Tiga) Bulan</b>.
+        </p>
+        <p style="text-indent: 1.1cm; margin-bottom: 10px; font-size:11pt;">
+            Sehubungan dengan hal tersebut kami mengajukan permohonan kepada Bapak/Ibu untuk dapat memberikan kesempatan kepada Peserta Didik kami melaksanakan Praktik Kerja Lapangan di Perusahaan/Instansi yang Bapak/Ibu Pimpin.
+        </p>
+        <p style="text-indent: 1.1cm; margin-bottom: 10px; font-size:11pt;">
+            Pelaksanaan Praktik Kerja Lapangan tersebut kami rencanakan mulai tanggal <b>{{ $tanggal_mulai ?? ($permohonan->tanggal_mulai ? \Carbon\Carbon::parse($permohonan->tanggal_mulai)->translatedFormat('d F Y') : '01 Juli 2025') }}</b> sampai dengan <b>{{ $tanggal_selesai ?? ($permohonan->tanggal_selesai ? \Carbon\Carbon::parse($permohonan->tanggal_selesai)->translatedFormat('d F Y') : '30 September 2025') }}</b>. Adapun daftar peserta didik yang kami ajukan yaitu:
+        </p>
+        <div class="student-list" style="margin-left: 20px; margin-top: 10px; margin-bottom: 10px;">
+            @php
+                // Jika ada relasi siswa (banyak), gunakan, jika tidak, fallback ke user permohonan
+                $daftarSiswa = [];
+                if(isset($siswa)) {
+                    $daftarSiswa = $siswa;
+                } elseif(isset($permohonan->siswa) && is_iterable($permohonan->siswa)) {
+                    $daftarSiswa = $permohonan->siswa;
+                } elseif(isset($permohonan->users) && is_iterable($permohonan->users)) {
+                    $daftarSiswa = $permohonan->users;
+                } elseif(isset($permohonan->user)) {
+                    $daftarSiswa = [$permohonan->user];
+                }
+            @endphp
+            @foreach($daftarSiswa as $i => $item)
+                {{ $i+1 }}. {{ $item->name }} (NIS/NISN: {{ $item->nis ?? $item->nisn }}) - {{ $item->kelas ?? '-' }} - {{ $item->konsentrasi_keahlian ?? $item->jurusan ?? '-' }}<br>
+            @endforeach
         </div>
-        
-        <!-- Recipient -->
-        <div class="recipient">
-            <p>Kepada Yth.</p>
-            <p>Pimpinan {{ $permohonan->nama_perusahaan }}</p>
-            <p>{{ $permohonan->alamat_perusahaan }}</p>
+        <p style="text-indent: 1.2cm; margin-bottom: 12px;">
+            Demikian surat permohonan ini kami sampaikan, atas perhatian dan kerjasama Bapak/Ibu kami ucapkan terima kasih.
+        </p>
+    </div>
+    <div style="width:100%; margin-top:40px;">
+        <div style="float:right; text-align:left; width:300px;">
+            Kepala SMK Bina Mandiri Bekasi<br><br><br><br>
+            <b>{{ $kepala_sekolah ?? 'Endah Sulistiani, S. Pd, M. Si.' }}</b>
         </div>
-        
-        <!-- Subject -->
-        <div class="subject">
-            <p>PERMOHONAN PRAKTIK KERJA LAPANGAN (PKL)</p>
-        </div>
-        
-        <!-- Content -->
-        <div class="content">
-            <p>Dengan hormat,</p>
-            
-            <p>Dalam rangka melaksanakan kurikulum SMK Negeri 1 Contoh, maka kami bermaksud mengajukan permohonan Praktik Kerja Lapangan (PKL) untuk siswa kami pada perusahaan yang Bapak/Ibu pimpin. Adapun pelaksanaan Praktik Kerja Lapangan tersebut rencananya akan dilaksanakan pada:</p>
-            
-            <table style="margin-left: 1cm; margin-bottom: 0.5cm;">
-                <tr>
-                    <td width="150">Tanggal</td>
-                    <td>: {{ $permohonan->tanggal_mulai->format('d F Y') }} s/d {{ $permohonan->tanggal_selesai->format('d F Y') }}</td>
-                </tr>
-                <tr>
-                    <td>Durasi</td>
-                    <td>: {{ $permohonan->tanggal_mulai->diffInDays($permohonan->tanggal_selesai) }} hari</td>
-                </tr>
-                <tr>
-                    <td>Jurusan</td>
-                    <td>: {{ $permohonan->siswa->jurusan }}</td>
-                </tr>
-            </table>
-            
-            <p>Untuk keperluan tersebut, kami menugaskan siswa kami:</p>
-            
-            <table style="margin-left: 1cm; margin-bottom: 0.5cm;">
-                <tr>
-                    <td width="150">Nama</td>
-                    <td>: {{ $permohonan->siswa->name }}</td>
-                </tr>
-                <tr>
-                    <td>NIS</td>
-                    <td>: {{ $permohonan->siswa->nis }}</td>
-                </tr>
-                <tr>
-                    <td>Kelas</td>
-                    <td>: {{ $permohonan->siswa->kelas }}</td>
-                </tr>
-            </table>
-            
-            <p>Demikian permohonan ini kami sampaikan. Atas perhatian dan kerjasamanya, kami ucapkan terima kasih.</p>
-        </div>
-        
-        <!-- Signature -->
-        <div class="student-info">
-            <p>Siswa yang bersangkutan,</p>
-            <p class="student-name">{{ $permohonan->siswa->name }}</p>
-            <p>NIS. {{ $permohonan->siswa->nis }}</p>
-        </div>
-        
-        <div class="signature">
-            <p>Kepala SMK Negeri 1 Contoh</p>
-            <p class="signature-name">Drs. Nama Kepala Sekolah, M.Pd.</p>
-            <p>NIP. 196012121980031001</p>
-        </div>
-        
-        <div class="clear"></div>
-        
-        <!-- Footer -->
-        <div class="footer">
-            <p><em>Catatan: Surat ini sah tanpa stempel dan tanda tangan karena dicetak secara elektronik melalui Sistem Manajemen PKL.</em></p>
-        </div>
-        
-        <!-- Print Info -->
-        <div class="print-info">
-            Dicetak oleh: {{ auth()->user()->name }} ({{ ucfirst(auth()->user()->role) }})<br>
-            Tanggal: {{ now()->format('d-m-Y H:i:s') }}
-        </div>
+    </div>
+    <div class="clear"></div>
+    <div class="contact" style="margin-top:60px; font-size:10pt;">
+        <b>Contact Person :</b><br>
+        @if(isset($kontak) && is_array($kontak))
+            @foreach($kontak as $cp)
+                {{ $cp }}<br>
+            @endforeach
+        @else
+            Rohman, S.Pd., MA : 0857 1884 8436<br>
+            Indra Ridho P., S.T : 0812 8297 9669<br>
+            Lulu Ani Asmaul H., S.Pd : 0822 6036 3190<br>
+            Afifah Muthia I., A.Md., KA : 0877 8041 3599
+        @endif
     </div>
     
     <!-- Print Button -->
@@ -287,5 +292,6 @@
     <a href="{{ route('permohonan.show', $permohonan) }}" class="back-button no-print">
         <i class="fas fa-arrow-left me-2"></i>Kembali
     </a>
+    </div>
 </body>
 </html>
