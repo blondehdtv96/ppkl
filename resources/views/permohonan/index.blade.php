@@ -23,7 +23,20 @@
                 </div>
                 <div class="card-body">
                     <form method="GET" action="{{ route('permohonan.index') }}" class="row g-3 align-items-end">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
+                            <label class="form-label">Jurusan</label>
+                            <select class="form-select" name="jurusan_filter">
+                                <option value="">Semua Jurusan</option>
+                                @foreach(auth()->user()->jurusan_diampu as $jurusan)
+                                    <option value="{{ $jurusan }}" {{ request('jurusan_filter') == $jurusan ? 'selected' : '' }}>{{ $jurusan }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Kelas</label>
+                            <input type="text" class="form-control" name="kelas_filter" value="{{ request('kelas_filter') }}" placeholder="Contoh: XI TKJ A">
+                        </div>
+                        <div class="col-md-4">
                             <label class="form-label">Status Permohonan PKL</label>
                             <select class="form-select" name="status_permohonan">
                                 <option value="">Semua Status</option>
@@ -41,10 +54,6 @@
                                 <option value="ditolak_hubin" {{ request('status_permohonan') == 'ditolak_hubin' ? 'selected' : '' }}>Ditolak Hubin</option>
                             </select>
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Kelas</label>
-                            <input type="text" class="form-control" name="kelas" value="{{ request('kelas') }}" placeholder="Contoh: XI TKJ A">
-                        </div>
                         <div class="col-md-12">
                             <button type="submit" class="btn btn-primary w-100"><i class="fas fa-search me-2"></i> Cari</button>
                         </div>
@@ -54,8 +63,11 @@
                         $query = \App\Models\User::where('role', 'siswa');
                         if ($kaprog->jurusan_diampu && is_array($kaprog->jurusan_diampu)) {
                             $query->whereIn('jurusan', $kaprog->jurusan_diampu);
-                            if (request('kelas')) {
-                                $query->where('kelas', 'like', "%" . request('kelas') . "%");
+                            if (request('jurusan_filter')) {
+                                $query->where('jurusan', request('jurusan_filter'));
+                            }
+                            if (request('kelas_filter')) {
+                                $query->where('kelas', 'like', "%" . request('kelas_filter') . "%");
                             }
                         } else {
                             $query->whereRaw('1 = 0');
@@ -322,7 +334,14 @@
                         </td>
                         
                         <td>
-                            <span class="badge status-badge {{ $item->getStatusColor() }}">
+                            <span class="badge status-badge {{ $item->getStatusColor() }}" style="color:
+                                @if($item->status == 'diajukan') #0d6efd;
+                                @elseif(Str::startsWith($item->status, 'disetujui')) #198754;
+                                @elseif(Str::startsWith($item->status, 'ditolak')) #dc3545;
+                                @elseif($item->status == 'dicetak_hubin') #0dcaf0;
+                                @else #6c757d;
+                                @endif
+                            ">
                                 {{ $item->getStatusLabel() }}
                             </span>
                             @if($item->isRejected())
