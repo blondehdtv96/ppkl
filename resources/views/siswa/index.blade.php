@@ -62,6 +62,7 @@
         <div class="card mb-4">
             <div class="card-body">
                 <form method="GET" action="{{ route('siswa.index') }}" class="row g-3">
+                    @if(auth()->user()->role !== 'wali_kelas')
                     <div class="col-md-3">
                         <label for="search" class="form-label">Pencarian</label>
                         <input type="text" class="form-control" id="search" name="search" 
@@ -106,6 +107,37 @@
                             </a>
                         </div>
                     </div>
+                    @else
+                    <!-- Layout untuk Wali Kelas (tanpa filter jurusan dan kelas) -->
+                    <div class="col-md-6">
+                        <label for="search" class="form-label">Pencarian</label>
+                        <input type="text" class="form-control" id="search" name="search" 
+                               value="{{ request('search') }}" placeholder="Nama, email, atau NIS...">
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <label for="status" class="form-label">Status</label>
+                        <select class="form-select" id="status" name="status">
+                            <option value="">Semua Status</option>
+                            <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Aktif</option>
+                            <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>Nonaktif</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <label class="form-label">&nbsp;</label>
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-search me-2"></i>
+                                Cari
+                            </button>
+                            <a href="{{ route('siswa.index') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-2"></i>
+                                Reset
+                            </a>
+                        </div>
+                    </div>
+                    @endif
                 </form>
             </div>
         </div>
@@ -128,7 +160,9 @@
                                 <tr>
                                     <th>Siswa</th>
                                     <th>Kelas</th>
+                                    @if(auth()->user()->role !== 'wali_kelas')
                                     <th>Jurusan</th>
+                                    @endif
                                     <th>NIS</th>
                                     <th>Status</th>
                                     <th>Aksi</th>
@@ -150,7 +184,9 @@
                                     </td>
                                     
                                     <td>{{ $s->kelas }}</td>
+                                    @if(auth()->user()->role !== 'wali_kelas')
                                     <td>{{ $s->jurusan }}</td>
+                                    @endif
                                     <td>{{ $s->nis }}</td>
                                     
                                     <td>

@@ -55,6 +55,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/permohonan/{permohonan}/process', [PermohonanPklController::class, 'process'])->name('permohonan.process')->middleware('validate.siswa.access');
     Route::get('/permohonan/{permohonan}/print', [PermohonanPklController::class, 'print'])->name('permohonan.print')->middleware('validate.siswa.access');
     Route::patch('/permohonan/{permohonan}/update-pembimbing', [PermohonanPklController::class, 'updatePembimbing'])->name('permohonan.updatePembimbing')->middleware('role:hubin');
+    Route::get('/permohonan/export/excel', [PermohonanPklController::class, 'exportExcel'])->name('permohonan.export.excel')->middleware('role:kaprog');
+    Route::get('/siswa/export/excel', [PermohonanPklController::class, 'exportSiswaExcel'])->name('siswa.export.excel')->middleware('role:kaprog');
 
     // Notifikasi Routes
     Route::get('/notifikasi', [NotifikasiController::class, 'index'])->name('notifikasi.index');

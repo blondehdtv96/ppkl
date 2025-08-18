@@ -6,10 +6,13 @@ use App\Models\PermohonanPkl;
 use App\Models\HistoriPermohonan;
 use App\Models\Notifikasi;
 use App\Models\User;
+use App\Exports\PermohonanPklExport;
+use App\Exports\SiswaExport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
 
 class PermohonanPklController extends Controller
 {
@@ -541,6 +544,144 @@ class PermohonanPklController extends Controller
         } catch (\Exception $e) {
             DB::rollback();
             return back()->with('error', 'Gagal memperbarui data: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Export permohonan PKL data to Excel for kaprog
+     */
+    public function exportExcel(Request $request)
+    {
+        $user = Auth::user();
+        
+        // Pastikan hanya kaprog yang bisa mengakses
+        if (!$user->isKaprog()) {
+            return redirect()->route('permohonan.index')
+                           ->with('error', 'Anda tidak berwenang mengakses fitur ini.');
+        }
+
+        // Validasi parameter
+        $request->validate([
+            'kelas' => 'nullable|string|max:20',
+            'jurusan' => 'nullable|string|max:20', 
+            'status_permohonan' => 'nullable|string|max:50'
+        ]);
+
+        $kelas = $request->get('kelas');
+        $jurusan = $request->get('jurusan');
+        $statusFilter = $request->get('status_permohonan');
+
+        try {
+            // Generate filename dengan timestamp
+            $timestamp = now()->format('Y-m-d_H-i-s');
+            $filename = "Data_Permohonan_PKL_{$timestamp}";
+            
+            if ($kelas && $jurusan) {
+                $filename .= "_{$kelas}_{$jurusan}";
+            } elseif ($kelas) {
+                $filename .= "_Kelas_{$kelas}";
+            } elseif ($jurusan) {
+                $filename .= "_Jurusan_{$jurusan}";
+            }
+            
+            if ($statusFilter) {
+                $statusLabels = [
+                    'draft' => 'Draft',
+                    'diajukan' => 'Diajukan',
+                    'ditolak_wali' => 'Ditolak_Wali',
+                    'disetujui_wali' => 'Disetujui_Wali',
+                    'ditolak_bp' => 'Ditolak_BP',
+                    'disetujui_bp' => 'Disetujui_BP',
+                    'ditolak_kaprog' => 'Ditolak_Kaprog',
+                    'disetujui_kaprog' => 'Disetujui_Kaprog',
+                    'ditolak_tu' => 'Ditolak_TU',
+                    'disetujui_tu' => 'Disetujui_TU',
+                    'dicetak_hubin' => 'Disetujui_Hubin'
+                ];
+                $statusLabel = $statusLabels[$statusFilter] ?? str_replace(' ', '_', $statusFilter);
+                $filename .= "_{$statusLabel}";
+            }
+            
+            $filename .= '.xlsx';
+
+            // Create export dengan parameter filter
+            $export = new PermohonanPklExport($kelas, $jurusan, $statusFilter, $user);
+            
+            // Download Excel file
+            return Excel::download($export, $filename);
+            
+        } catch (\Exception $e) {
+            return redirect()->route('permohonan.index')
+                           ->with('error', 'Gagal mengekspor data: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Export student data to Excel for kaprog
+     */
+    public function exportSiswaExcel(Request $request)
+    {
+        $user = Auth::user();
+        
+        // Pastikan hanya kaprog yang bisa mengakses
+        if (!$user->isKaprog()) {
+            return redirect()->route('permohonan.index')
+                           ->with('error', 'Anda tidak berwenang mengakses fitur ini.');
+        }
+
+        // Validasi parameter
+        $request->validate([
+            'jurusan_filter' => 'nullable|string|max:20',
+            'kelas_filter' => 'nullable|string|max:50', 
+            'status_permohonan' => 'nullable|string|max:50'
+        ]);
+
+        $jurusan = $request->get('jurusan_filter');
+        $kelas = $request->get('kelas_filter');
+        $statusPermohonan = $request->get('status_permohonan');
+
+        try {
+            // Generate filename dengan timestamp
+            $timestamp = now()->format('Y-m-d_H-i-s');
+            $filename = "Data_Siswa_{$timestamp}";
+            
+            if ($jurusan && $kelas) {
+                $filename .= "_{$kelas}_{$jurusan}";
+            } elseif ($jurusan) {
+                $filename .= "_Jurusan_{$jurusan}";
+            } elseif ($kelas) {
+                $filename .= "_Kelas_{$kelas}";
+            }
+            
+            if ($statusPermohonan) {
+                $statusLabels = [
+                    'draft' => 'Draft',
+                    'diajukan' => 'Diajukan',
+                    'ditolak_wali' => 'Ditolak_Wali',
+                    'disetujui_wali' => 'Disetujui_Wali',
+                    'ditolak_bp' => 'Ditolak_BP',
+                    'disetujui_bp' => 'Disetujui_BP',
+                    'ditolak_kaprog' => 'Ditolak_Kaprog',
+                    'disetujui_kaprog' => 'Disetujui_Kaprog',
+                    'ditolak_tu' => 'Ditolak_TU',
+                    'disetujui_tu' => 'Disetujui_TU',
+                    'dicetak_hubin' => 'Disetujui_Hubin'
+                ];
+                $statusLabel = $statusLabels[$statusPermohonan] ?? str_replace(' ', '_', $statusPermohonan);
+                $filename .= "_{$statusLabel}";
+            }
+            
+            $filename .= '.xlsx';
+
+            // Create export dengan parameter filter
+            $export = new SiswaExport($jurusan, $kelas, $statusPermohonan, $user);
+            
+            // Download Excel file
+            return Excel::download($export, $filename);
+            
+        } catch (\Exception $e) {
+            return redirect()->route('permohonan.index')
+                           ->with('error', 'Gagal mengekspor data siswa: ' . $e->getMessage());
         }
     }
 }
