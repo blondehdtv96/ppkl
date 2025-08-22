@@ -118,6 +118,7 @@ class PermohonanPkl extends Model
             'ditolak_tu' => 'Ditolak TU',
             'disetujui_tu' => 'Disetujui TU',
             'dicetak_hubin' => 'Disetujui Hubin',
+            'diperbaiki' => 'Diperbaiki',
         ];
 
         return $statusLabels[$this->status] ?? $this->status;
@@ -145,6 +146,7 @@ class PermohonanPkl extends Model
             'ditolak_tu' => 'danger',
             'disetujui_tu' => 'success',
             'dicetak_hubin' => 'primary',
+            'diperbaiki' => 'warning',
         ];
 
         return $statusColors[$this->status] ?? 'secondary';
@@ -238,6 +240,37 @@ class PermohonanPkl extends Model
     public function canBeEdited()
     {
         return in_array($this->status, ['ditolak_wali', 'ditolak_bp', 'ditolak_kaprog', 'ditolak_tu']);
+    }
+
+    public function canBeRepaired()
+    {
+        return in_array($this->status, ['ditolak_wali', 'ditolak_bp', 'ditolak_kaprog', 'ditolak_tu']);
+    }
+
+    public function getRepairTargetRole()
+    {
+        // Menentukan role yang akan memproses setelah perbaikan berdasarkan status penolakan terakhir
+        $roleMap = [
+            'ditolak_wali' => 'wali_kelas',
+            'ditolak_bp' => 'bp',
+            'ditolak_kaprog' => 'kaprog',
+            'ditolak_tu' => 'tu',
+        ];
+
+        return $roleMap[$this->status] ?? null;
+    }
+
+    public function getRepairTargetStatus()
+    {
+        // Menentukan status yang akan diset setelah perbaikan berdasarkan status penolakan terakhir
+        $statusMap = [
+            'ditolak_wali' => 'diajukan',
+            'ditolak_bp' => 'disetujui_wali',
+            'ditolak_kaprog' => 'disetujui_bp',
+            'ditolak_tu' => 'disetujui_kaprog',
+        ];
+
+        return $statusMap[$this->status] ?? null;
     }
 
     public function getSiswaAttribute()

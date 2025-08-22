@@ -665,6 +665,7 @@
                                 @elseif(Str::startsWith($item->status, 'disetujui')) #198754;
                                 @elseif(Str::startsWith($item->status, 'ditolak')) #dc3545;
                                 @elseif($item->status == 'dicetak_hubin') #0dcaf0;
+                                @elseif($item->status == 'diperbaiki') #000;
                                 @else #6c757d;
                                 @endif
                             ">
@@ -680,9 +681,9 @@
                         </td>
                         
                         <td>
-                            @if($item->current_processor_role)
+                            @if($item->current_role)
                             <span class="badge bg-info">
-                                {{ ucfirst(str_replace('_', ' ', $item->current_processor_role)) }}
+                                {{ ucfirst(str_replace('_', ' ', $item->current_role)) }}
                             </span>
                             @else
                             <span class="text-muted">-</span>
@@ -711,6 +712,20 @@
                                    title="Edit">
                                     <i class="fas fa-edit"></i>
                                 </a>
+                                @endif
+                                
+                                @if(auth()->user()->role === 'siswa' && $item->canBeRepaired())
+                                <form action="{{ route('permohonan.repair', $item) }}" 
+                                      method="POST" 
+                                      class="d-inline"
+                                      onsubmit="return confirm('Yakin ingin memperbaiki dan mengajukan ulang permohonan ini?')">
+                                    @csrf
+                                    <button type="submit" 
+                                            class="btn btn-outline-primary" 
+                                            title="Perbaiki Permohonan">
+                                        <i class="fas fa-tools"></i>
+                                    </button>
+                                </form>
                                 @endif
                                 
                                 @if($item->canProcess(auth()->user()))

@@ -253,22 +253,26 @@
             <div class="card-body">
                 <div class="timeline">
                     @foreach($permohonan->histori->sortBy('created_at') as $histori)
-                    <div class="timeline-item {{ $histori->status === $permohonan->status ? 'active' : '' }}">
+                    <div class="timeline-item {{ $histori->status_ke === $permohonan->status ? 'active' : '' }}">
                         <div class="timeline-marker">
                             <i class="fas fa-{{ $histori->getStatusIcon() }}"></i>
                         </div>
                         <div class="timeline-content">
                             <h6 class="mb-1">{{ $histori->getStatusLabel() }}</h6>
                             <p class="text-muted mb-1">
-                                {{ $histori->processor->name }} ({{ $histori->getRoleProcessorLabelAttribute() }})
+                                @if($histori->user)
+                                    {{ $histori->user->name }} ({{ $histori->getRoleProcessorLabelAttribute() }})
+                                @else
+                                    {{ $histori->getRoleProcessorLabelAttribute() }}
+                                @endif
                             </p>
                             <small class="text-muted">
                                 {{ $histori->created_at->format('d M Y H:i') }}
                             </small>
-                            @if($histori->keterangan)
+                            @if($histori->catatan)
                             <div class="mt-2">
                                 <small class="text-dark">
-                                    <strong>Keterangan:</strong> {{ $histori->keterangan }}
+                                    <strong>Catatan:</strong> {{ $histori->catatan }}
                                 </small>
                             </div>
                             @endif
@@ -610,6 +614,7 @@
 .badge-ditolak_wali, .badge-ditolak_bp, .badge-ditolak_kaprog, .badge-ditolak_tu { background-color: #dc3545; }
 .badge-disetujui_wali, .badge-disetujui_bp, .badge-disetujui_kaprog, .badge-disetujui_tu { background-color: #198754; }
 .badge-dicetak_hubin { background-color: #0d6efd; }
+.badge-diperbaiki { background-color: #ffc107; color: #000; }
 </style>
 @endpush
 

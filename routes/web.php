@@ -53,6 +53,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('permohonan', PermohonanPklController::class)->middleware('validate.siswa.access');
     Route::post('/permohonan/{permohonan}/submit', [PermohonanPklController::class, 'submit'])->name('permohonan.submit')->middleware('validate.siswa.access');
     Route::post('/permohonan/{permohonan}/process', [PermohonanPklController::class, 'process'])->name('permohonan.process')->middleware('validate.siswa.access');
+    Route::post('/permohonan/{permohonan}/repair', [PermohonanPklController::class, 'repair'])->name('permohonan.repair')->middleware('validate.siswa.access');
     Route::get('/permohonan/{permohonan}/print', [PermohonanPklController::class, 'print'])->name('permohonan.print')->middleware('validate.siswa.access');
     Route::patch('/permohonan/{permohonan}/update-pembimbing', [PermohonanPklController::class, 'updatePembimbing'])->name('permohonan.updatePembimbing')->middleware('role:hubin');
     Route::get('/permohonan/export/excel', [PermohonanPklController::class, 'exportExcel'])->name('permohonan.export.excel')->middleware('role:kaprog');

@@ -379,6 +379,80 @@ class PermohonanPklController extends Controller
         }
     }
 
+    public function repair(PermohonanPkl $permohonan)
+    {
+        $user = Auth::user();
+        
+        // Hanya siswa pemilik permohonan yang bisa melakukan perbaikan
+        if (!$user->isSiswa() || $permohonan->user_id !== $user->id) {
+            return redirect()->route('permohonan.index')
+                           ->with('error', 'Anda tidak berwenang memperbaiki permohonan ini.');
+        }
+        
+        // Pastikan permohonan bisa diperbaiki (status ditolak)
+        if (!$permohonan->canBeRepaired()) {
+            return redirect()->route('permohonan.index')
+                           ->with('error', 'Permohonan ini tidak dapat diperbaiki.');
+        }
+
+        DB::beginTransaction();
+        try {
+            $statusLama = $permohonan->status;
+            $targetRole = $permohonan->getRepairTargetRole();
+            $targetStatus = $permohonan->getRepairTargetStatus();
+            
+            if (!$targetRole || !$targetStatus) {
+                throw new \Exception('Tidak dapat menentukan target perbaikan.');
+            }
+            
+            // Update permohonan ke status diperbaiki dan set current_role
+            $permohonan->update([
+                'status' => 'diperbaiki',
+                'current_role' => $targetRole,
+                'catatan_penolakan' => null, // Clear catatan penolakan
+            ]);
+            
+            // Buat histori perbaikan
+            HistoriPermohonan::create([
+                'permohonan_id' => $permohonan->id,
+                'user_id' => $user->id,
+                'status_dari' => $statusLama,
+                'status_ke' => 'diperbaiki',
+                'role_processor' => 'siswa',
+                'catatan' => 'Permohonan PKL telah diperbaiki oleh siswa dan siap untuk diproses kembali',
+                'aksi' => 'diteruskan',
+            ]);
+            
+            // Langsung ubah status ke target status untuk melanjutkan alur
+            $permohonan->update([
+                'status' => $targetStatus,
+            ]);
+            
+            // Buat histori lanjutan untuk status target
+            HistoriPermohonan::create([
+                'permohonan_id' => $permohonan->id,
+                'user_id' => $user->id,
+                'status_dari' => 'diperbaiki',
+                'status_ke' => $targetStatus,
+                'role_processor' => 'siswa',
+                'catatan' => 'Permohonan diteruskan kembali ke ' . $this->getRoleLabel($targetRole),
+                'aksi' => 'diteruskan',
+            ]);
+            
+            // Kirim notifikasi ke role yang harus memproses
+            $this->sendNotificationToRole($targetRole, $permohonan, 
+                'Permohonan PKL Diperbaiki', 
+                'Permohonan PKL dari ' . $user->name . ' telah diperbaiki dan siap untuk diproses kembali.');
+            
+            DB::commit();
+            return redirect()->route('permohonan.index')
+                           ->with('success', 'Permohonan PKL berhasil diperbaiki dan diteruskan untuk diproses kembali.');
+        } catch (\Exception $e) {
+            DB::rollback();
+            return back()->with('error', 'Gagal memperbaiki permohonan: ' . $e->getMessage());
+        }
+    }
+
     public function print(PermohonanPkl $permohonan)
     {
         $user = Auth::user();
